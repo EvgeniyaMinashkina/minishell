@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 13:12:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/12 14:18:27 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/18 18:15:22 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,3 +81,61 @@ int	main(int argc, char **argv, char **envp)
 		free(line);
 	}
 }
+
+/*
+void new_shell(t_shell *shell, char **envp)
+{
+	shell->envp = envp;
+	shell->syntax_error_msg = NULL;
+	shell->exit_status = 0;
+	shell->cmd_list = NULL;
+}
+
+int	main(int argc, char **argv, char **envp)
+{
+	char	*line;
+	t_shell	shell;
+
+	if (argc != 1 || !argv[0])
+		return (ft_printf("minishell: invalid arguments\n"), 2);
+	new_shell(&shell, envp);
+	while (1)
+	{
+		line = readline("minishell> ");
+		if (!line) //Ctrl-D
+		{
+			ft_printf("exit\n");
+			break;
+		}
+		if (*line == '\0')
+		{
+			shell.exit_status = 0;
+			// printf ("Exit status %d\n", shell.exit_status);
+			free(line);
+			continue;
+		}
+		if (*line)
+			add_history(line);
+		shell.tokens = lexer(&shell, line);
+		syntax_check(&shell);
+		if (shell.syntax_error_msg)
+		{
+			ft_putendl_fd(shell.syntax_error_msg, 2);
+			free(shell.syntax_error_msg);
+			shell.syntax_error_msg = NULL;
+		}
+		else
+		{
+			// printf ("Exit status %d\n", shell.exit_status);
+			shell.cmd_list = parse_tokens(&shell);
+			expand_cmds(&shell);
+			print_cmds(shell.cmd_list);
+			printf("------------------------------------------\n");
+		}
+		free(line);
+		free_tokens(shell.tokens);
+	}
+
+	return (0);
+}
+*/
