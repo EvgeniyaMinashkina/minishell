@@ -70,7 +70,10 @@ int	execute_single_command(t_cmd *cmd, t_shell *shell)
 			STDOUT_FILENO,
 			shell);
 	if (pid < 0)
+	{
+		shell->exit_status = 1;
 		return (1);
+	}
 	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))
 		shell->exit_status = WEXITSTATUS(status);
@@ -154,13 +157,19 @@ int	execute_pipeline(t_cmd *cmd_list, t_shell *shell)
 	while (cmd)
 	{
 		if (setup_pipe(cmd, pipefd))
+		{
+			shell->exit_status = 1;
 			return (1);
+		}
 		last_pid = execute_command(cmd,
 				prev_fd,
 				get_output_fd(cmd, pipefd),
 				shell);
 		if (last_pid < 0)
+		{
+			shell->exit_status = 1;
 			return (handle_exec_error(prev_fd, cmd, pipefd));
+		}
 		update_fds(&prev_fd, cmd, pipefd);
 		cmd = cmd->next;
 	}
