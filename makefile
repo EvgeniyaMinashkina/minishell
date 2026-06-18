@@ -3,6 +3,18 @@ NAME = minishell
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
+# Автоматическое определение ОС (Mac или Linux/Windows WSL)
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S), Darwin)
+	# Настройки для macOS (процессоры Apple Silicon)
+	CFLAGS  += -I/opt/homebrew/opt/readline/include
+	LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline
+else
+	# Настройки для Windows WSL / Linux (readline обычно предустановлен в системе)
+	LDFLAGS = -lreadline
+endif
+
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
@@ -38,7 +50,7 @@ INCLUDES = -I$(LIBFT_DIR) -Iincludes
 all: $(NAME)
 
 $(NAME): $(LIBFT) $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -lreadline -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) $(LDFLAGS) -o $(NAME)
 
 $(LIBFT):
 	$(MAKE) -C $(LIBFT_DIR)

@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 13:42:03 by tkoval            #+#    #+#             */
-/*   Updated: 2026/04/26 16:43:30 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/18 18:44:30 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ void	print_argv(char **argv)
 	int	i = 0;
 
 	if (!argv)
-		return;
+		return ;
 	while (argv[i])
 	{
 		printf("    argv[%d]: %s\n", i, argv[i]);
