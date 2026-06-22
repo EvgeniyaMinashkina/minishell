@@ -39,8 +39,11 @@ SRCS = \
 	system/heredoc.c \
 	system/signals.c \
 	system/path.c \
+	builtins/builtins_check.c \
+	builtins/builtins_utils.c \
 	builtins/builtins.c \
 	builtins/env.c \
+	builtins/env_utils.c \
 	utils/free_cmd.c
 
 OBJS = $(SRCS:.c=.o)

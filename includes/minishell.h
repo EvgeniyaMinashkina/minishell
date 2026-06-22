@@ -172,6 +172,10 @@ int		execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell);
 
 int		is_builtin(char *cmd);
 int		is_parent_builtin(char *cmd);
+int		builtin_pwd(void);
+int		builtin_echo(char **argv);
+int		builtin_env(char **envp);
+int		is_valid_exit_number(char *str);
 int		exec_builtin(t_cmd *cmd, t_shell *shell);
 
 /* ************************************************************************** */
@@ -198,10 +202,12 @@ void	init_signals_child(void);
 /*                                    ENV                                     */
 /* ************************************************************************** */
 
+int		env_count(char **envp);
 char	*env_get(char **envp, const char *key);
 int		env_set(char ***envp, const char *key, const char *value);
 int		env_unset(char ***envp, const char *key);
 char	**env_init(char **envp);
+char	*create_env_line(const char *key, const char *value);
 void	free_env(char **envp);
 
 /* ************************************************************************** */

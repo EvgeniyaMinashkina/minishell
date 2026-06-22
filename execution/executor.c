@@ -12,6 +12,11 @@
 
 #include "minishell.h"
 
+static void	child_exit(t_shell *shell, int status)
+{
+	shell_exit(shell, status);
+}
+
 /*
 ** Fork + execute one command
 ** Handles:
@@ -31,34 +36,34 @@ int	execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 	{
 		init_signals_child();
 		if (!cmd || !cmd->argv || !cmd->argv[0])
-			exit(0);
+			child_exit(shell, 0);
 		if (in_fd != STDIN_FILENO)
 		{
 			if (dup2(in_fd, STDIN_FILENO) < 0)
-				exit(1);
+				child_exit(shell, 1);
 			close(in_fd);
 		}
 		if (out_fd != STDOUT_FILENO)
 		{
 			if (dup2(out_fd, STDOUT_FILENO) < 0)
-				exit(1);
+				child_exit(shell, 1);
 			close(out_fd);
 		}
 		if (apply_redirections(cmd->redirs, shell))
-			exit(shell->exit_status);
+			child_exit(shell, shell->exit_status);
 		if (is_builtin(cmd->argv[0]))
-			exit(exec_builtin(cmd, shell));
+			child_exit(shell, exec_builtin(cmd, shell));
 		path = find_cmd_path(cmd->argv[0], shell->envp);
 		if (!path)
 		{
 			ft_putstr_fd(cmd->argv[0], 2);
 			ft_putstr_fd(": command not found\n", 2);
-			exit(127);
+			child_exit(shell, 127);
 		}
 		execve(path, cmd->argv, shell->envp);
 		perror("execve");
 		free(path);
-		exit(126);
+		child_exit(shell, 126);
 	}
 	return (pid);
 }

@@ -12,82 +12,6 @@
 
 #include "minishell.h"
 
-extern	char	**environ;
-
-/*
-** Check if command is builtin
-*/
-int	is_builtin(char *cmd)
-{
-	if (!cmd)
-		return (0);
-	return (!ft_strncmp(cmd, "echo", 5)
-		|| !ft_strncmp(cmd, "cd", 3)
-		|| !ft_strncmp(cmd, "pwd", 4)
-		|| !ft_strncmp(cmd, "env", 4)
-		|| !ft_strncmp(cmd, "export", 7)
-		|| !ft_strncmp(cmd, "unset", 6)
-		|| !ft_strncmp(cmd, "exit", 5));
-}
-
-/*
-** Builtins that must execute in parent
-*/
-int	is_parent_builtin(char *cmd)
-{
-	return (!ft_strncmp(cmd, "cd", 3)
-		|| !ft_strncmp(cmd, "export", 7)
-		|| !ft_strncmp(cmd, "unset", 6)
-		|| !ft_strncmp(cmd, "exit", 5));
-}
-
-static int	builtin_pwd(void)
-{
-	char	cwd[1024];
-
-	if (!getcwd(cwd, sizeof(cwd)))
-		return (1);
-	printf("%s\n", cwd);
-	return (0);
-}
-
-static int	builtin_echo(char **argv)
-{
-	int	i;
-	int	newline;
-
-	i = 1;
-	newline = 1;
-	if (argv[1] && !ft_strncmp(argv[1], "-n", 3))
-	{
-		newline = 0;
-		i++;
-	}
-	while (argv[i])
-	{
-		printf("%s", argv[i]);
-		if (argv[i + 1])
-			printf(" ");
-		i++;
-	}
-	if (newline)
-		printf("\n");
-	return (0);
-}
-
-static int	builtin_env(char **envp)
-{
-	int	i;
-
-	i = 0;
-	while (envp[i])
-	{
-		printf("%s\n", envp[i]);
-		i++;
-	}
-	return (0);
-}
-
 static int	builtin_export(char **argv, t_shell *shell)
 {
 	char	*eq;
@@ -132,35 +56,6 @@ static int	builtin_cd(char **argv, t_shell *shell)
 		return (1);
 	}
 	return (0);
-}
-
-static int	is_valid_exit_number(char *str)
-{
-	long long	num;
-	int			sign;
-	int			i;
-
-	num = 0;
-	sign = 1;
-	i = 0;
-	if (str[i] == '+' || str[i] == '-')
-	{
-		if (str[i] == '-')
-			sign = -1;
-		i++;
-	}
-	if (!str[i])
-		return (0);
-	while (str[i])
-	{
-		if (!ft_isdigit(str[i]))
-			return (0);
-		num = num * 10 + (str[i] - '0');
-		if ((sign == 1 && num > LLONG_MAX) || (sign == -1 && -num < LLONG_MIN))
-			return (0);
-		i++;
-	}
-	return (1);
 }
 
 /*

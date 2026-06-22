@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-static int	env_count(char **envp)
+int	env_count(char **envp)
 {
 	int	i;
 
@@ -22,53 +22,7 @@ static int	env_count(char **envp)
 	return (i);
 }
 
-char	**env_init(char **envp)
-{
-	char	**copy;
-	int		i;
-	int		size;
-
-	size = env_count(envp);
-	copy = malloc(sizeof(char *) * (size + 1));
-	if (!copy)
-		return (NULL);
-	i = 0;
-	while (envp[i])
-	{
-		copy[i] = ft_strdup(envp[i]);
-		if (!copy[i])
-		{
-			while (--i >= 0)
-				free(copy[i]);
-			free(copy);
-			return (NULL);
-		}
-		i++;
-	}
-	copy[i] = NULL;
-	return (copy);
-}
-
-char	*env_get(char **envp, const char *key)
-{
-	int		i;
-	size_t	len;
-
-	if (!envp || !key)
-		return (NULL);
-	len = ft_strlen(key);
-	i = 0;
-	while (envp[i])
-	{
-		if (ft_strncmp(envp[i], key, len) == 0
-			&& envp[i][len] == '=')
-			return (envp[i] + len + 1);
-		i++;
-	}
-	return (NULL);
-}
-
-static char	*create_env_line(const char *key, const char *value)
+char	*create_env_line(const char *key, const char *value)
 {
 	char	*tmp;
 	char	*res;
@@ -81,15 +35,11 @@ static char	*create_env_line(const char *key, const char *value)
 	return (res);
 }
 
-int	env_set(char ***envp, const char *key, const char *value)
+static int	update_env_var(char ***envp, const char *key, const char *value)
 {
-	char	**new_env;
-	char	*new_line;
 	int		i;
-	int		size;
+	char	*new_line;
 
-	if (!envp || !*envp || !key || !value)
-		return (1);
 	i = 0;
 	while ((*envp)[i])
 	{
@@ -105,8 +55,17 @@ int	env_set(char ***envp, const char *key, const char *value)
 		}
 		i++;
 	}
-	size = env_count(*envp);
-	new_env = malloc(sizeof(char *) * (size + 2));
+	return (-1);
+}
+
+static int	add_env_var(char ***envp, const char *key, const char *value)
+{
+	char	**new_env;
+	char	*new_line;
+	int		i;
+
+	i = env_count(*envp);
+	new_env = malloc(sizeof(char *) * (i + 2));
 	if (!new_env)
 		return (1);
 	i = 0;
@@ -117,10 +76,7 @@ int	env_set(char ***envp, const char *key, const char *value)
 	}
 	new_line = create_env_line(key, value);
 	if (!new_line)
-	{
-		free(new_env);
-		return (1);
-	}
+		return (free(new_env), 1);
 	new_env[i] = new_line;
 	new_env[i + 1] = NULL;
 	free(*envp);
@@ -128,45 +84,14 @@ int	env_set(char ***envp, const char *key, const char *value)
 	return (0);
 }
 
-int	env_unset(char ***envp, const char *key)
+int	env_set(char ***envp, const char *key, const char *value)
 {
-	int	i;
-	int	len;
+	int	status;
 
-	if (!envp || !*envp || !key)
+	if (!envp || !*envp || !key || !value)
 		return (1);
-	len = ft_strlen(key);
-	i = 0;
-	while ((*envp)[i])
-	{
-		if (!ft_strncmp((*envp)[i], key, len)
-			&& (*envp)[i][len] == '=')
-		{
-			free((*envp)[i]);
-			while ((*envp)[i + 1])
-			{
-				(*envp)[i] = (*envp)[i + 1];
-				i++;
-			}
-			(*envp)[i] = NULL;
-			return (0);
-		}
-		i++;
-	}
-	return (0);
-}
-
-void	free_env(char **envp)
-{
-	int	i;
-
-	if (!envp)
-		return ;
-	i = 0;
-	while (envp[i])
-	{
-		free(envp[i]);
-		i++;
-	}
-	free(envp);
+	status = update_env_var(envp, key, value);
+	if (status != -1)
+		return (status);
+	return (add_env_var(envp, key, value));
 }
