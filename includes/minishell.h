@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/12 14:22:05 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/21 22:00:48 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ typedef struct s_shell
 	t_cmd	*cmd_list;
 	char	**envp;
 	int		exit_status;
-	char	*syntax_error_msg;
+	char	*error_msg;
 }	t_shell;
 
 typedef enum e_error_type
@@ -203,13 +203,6 @@ int		env_set(char ***envp, const char *key, const char *value);
 int		env_unset(char ***envp, const char *key);
 char	**env_init(char **envp);
 void	free_env(char **envp);
-
-/* ************************************************************************** */
-/*                                   ERROR                                    */
-/* ************************************************************************** */
-int		throw_error(t_shell *shell, t_error_type type);
-char	*token_type_to_str(t_token *token);
-int		syntax_error_token(t_shell *shell, char *token_value);
 
 /* ************************************************************************** */
 /*                                   FREE                                     */

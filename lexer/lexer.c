@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 12:58:57 by tkoval            #+#    #+#             */
-/*   Updated: 2026/04/29 14:50:34 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/21 22:21:45 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,11 @@ char	*build_word(t_shell *shell, char *str, int *i)
 		buffer[j++] = str[*i];
 		(*i)++;
 	}
-	if (state != NONE && !shell->syntax_error_msg)
+	if (state != NONE && !shell->error_msg)
+	{
 		throw_error(shell, ERR_UNCLOSED_QUOTE);
+		return (NULL);
+	}
 	if (state != NONE)
 		return (NULL);
 	buffer[j] = '\0';
@@ -113,7 +116,7 @@ t_token	*lexer(t_shell *shell, char *str)
 		else
 		{
 			curr_word = build_word(shell, str, &i);
-			if (!curr_word)
+			if (!curr_word || shell->error_msg)
 				return (free_tokens(head), NULL);
 			add_new_token(&head, WORD, curr_word, NONE);
 		}

@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 14:39:42 by tkoval            #+#    #+#             */
-/*   Updated: 2026/04/20 15:12:28 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/21 22:35:55 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,13 @@ t_cmd	*parse_tokens(t_shell *shell)
 		{
 			curr_cmd = new_cmd();
 			if (!curr_cmd)
-				return (NULL); //TODO: handle error
+			{
+				throw_error(shell, ERR_MALLOC);
+				free_cmds(cmd_list);
+				free_tokens(shell->tokens);
+				shell->tokens = NULL;
+				return (NULL);
+			}
 			add_cmd_back(&cmd_list, curr_cmd);
 		}
 		while (head && head->type != PIPE)
@@ -41,7 +47,13 @@ t_cmd	*parse_tokens(t_shell *shell)
 				redir_type = head->type;
 				head = head->next;
 				if (head == NULL || head->type != WORD)
-					throw_error(shell, ERR_EXPECTED_FILENAME);
+				{
+					throw_error(shell, ERR_GENERAL);
+					free_cmds(cmd_list);
+					free_tokens(shell->tokens);
+					shell->tokens = NULL;
+					return (NULL);
+				}
 				add_redir(curr_cmd, redir_type, head->value);
 			}
 			head = head->next;
