@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/21 22:00:48 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 00:29:44 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,18 +163,26 @@ void	toggle_or_add_quote(t_quote_state *quote, char c, char **res);
 /* ************************************************************************** */
 
 int		execute_single_command(t_cmd *cmd, t_shell *shell);
+void	wait_last_pid(pid_t last_pid, t_shell *shell);
 int		execute_pipeline(t_cmd *cmd_list, t_shell *shell);
 int		execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell);
+int		setup_pipe(t_cmd *cmd, int pipefd[2]);
+int 	handle_exec_error(int prev_fd, t_cmd *cmd, int pipefd[2]);
+void	update_fds(int *prev_fd, t_cmd *cmd, int pipefd[2]);
+int		save_stdio(int *stdin_copy, int *stdout_copy);
+void	restore_stdio(int stdin_copy, int stdout_copy);
 
 /* ************************************************************************** */
 /*                                 BUILTINS                                   */
 /* ************************************************************************** */
 
+int		is_valid_identifier(char *str);
 int		is_builtin(char *cmd);
 int		is_parent_builtin(char *cmd);
 int		builtin_pwd(void);
 int		builtin_echo(char **argv);
 int		builtin_env(char **envp);
+void	export_error(char *arg);
 int		is_valid_exit_number(char *str);
 int		exec_builtin(t_cmd *cmd, t_shell *shell);
 

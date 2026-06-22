@@ -6,19 +6,17 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:16:12 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/22 23:11:14 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 00:56:02 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <sys/stat.h> //TODO
 
-static void	child_exit(t_shell *shell, int status)
+/*static void	child_exit(t_shell *shell, int status)
 {
 	shell_exit(shell, status);
-}
-
-#include <sys/stat.h> //TODO
-#include <errno.h>
+}*/
 
 static void	print_exec_error(char *cmd)
 {
@@ -26,12 +24,147 @@ static void	print_exec_error(char *cmd)
 	ft_putstr_fd(": ", 2);
 }
 
-static int	is_path(char *cmd)
+/*
+execute_pipeline
+   └── execute_command
+         └── execute_child
+               ├── input/output
+               ├── redirections
+               ├── builtin
+               └── exec
+*/
+
+static void	input_output_setup(t_shell *shell, int *in_fd, int *out_fd)
 {
-	return (ft_strchr(cmd, '/') != NULL);
+	if (*in_fd != STDIN_FILENO)
+	{
+		if (dup2(*in_fd, STDIN_FILENO) < 0)
+			shell_exit(shell, 1);
+		close(*in_fd);
+	}
+
+	if (*out_fd != STDOUT_FILENO)
+	{
+		if (dup2(*out_fd, STDOUT_FILENO) < 0)
+			shell_exit(shell, 1);
+		close(*out_fd);
+	}
+}
+
+/*// 🔥 CRITICAL FIX #1:
+// закрываем ВСЕ лишние pipe fd, которые могли унаследоваться
+// иначе yes | head висит*/
+void	close_odd_pipes(void)
+{
+	int	fd;
+
+	fd = 3;
+	while (fd < 1024)
+	{
+		close(fd);
+		fd++;
+	}
+}
+
+static void	exec_process(t_cmd *cmd, char *path, t_shell *shell)
+{
+	// struct stat	st;
+
+	execve(path, cmd->argv, shell->envp);
+
+	print_exec_error(cmd->argv[0]);
+
+	if (errno == EACCES)
+		ft_putendl_fd("Permission denied", 2);
+	else if (errno == EISDIR)
+		ft_putendl_fd("is a directory", 2);
+	else
+		perror("execve");
+
+	free(path);
+	shell_exit(shell, 126);
+}
+
+static char	*resolve_from_env(char *cmd, t_shell *shell)
+{
+	char	*path;
+
+	path = find_cmd_path(cmd, shell->envp);
+	if (!path)
+	{
+		print_exec_error(cmd);
+		ft_putendl_fd("command not found", 2);
+		exit(127);
+	}
+	return (path);
+}
+
+static char	*resolve_direct_path(char *arg, struct stat *st)
+{
+	if (stat(arg, st) != 0)
+	{
+		print_exec_error(arg);
+		ft_putendl_fd("No such file or directory", 2);
+		exit(127);
+	}
+	if (S_ISDIR(st->st_mode))
+	{
+		print_exec_error(arg);
+		ft_putendl_fd("is a directory", 2);
+		exit(126);
+	}
+	if (access(arg, X_OK) == -1)
+	{
+		print_exec_error(arg);
+		ft_putendl_fd("Permission denied", 2);
+		exit(126);
+	}
+	return (ft_strdup(arg));
+}
+
+static char	*resolve_path(t_cmd *cmd, t_shell *shell)
+{
+	struct stat	st;
+
+	if (ft_strchr(cmd->argv[0], '/') != NULL)
+		return (resolve_direct_path(cmd->argv[0], &st));
+	return (resolve_from_env(cmd->argv[0], shell));
+}
+
+static void	execute_child(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
+{
+	char	*path;
+
+	init_signals_child();
+	if (!cmd || !cmd->argv || !cmd->argv[0])
+		shell_exit(shell, 0);
+
+	input_output_setup(shell, &in_fd, &out_fd);
+	close_odd_pipes();
+
+	if (apply_redirections(cmd->redirs, shell))
+		shell_exit(shell, shell->exit_status);
+
+	if (is_builtin(cmd->argv[0]) && !is_parent_builtin(cmd->argv[0]))
+		shell_exit(shell, exec_builtin(cmd, shell));
+
+	path = resolve_path(cmd, shell);
+	exec_process(cmd, path, shell);
 }
 
 int	execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
+{
+	pid_t	pid;
+
+	pid = fork();
+	if (pid < 0)
+		return (-1);
+	if (pid == 0)
+		execute_child(cmd, in_fd, out_fd, shell);
+	return (pid);
+}
+
+/*int	execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 {
 	pid_t		pid;
 	char		*path;
@@ -54,14 +187,14 @@ int	execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 		if (in_fd != STDIN_FILENO)
 		{
 			if (dup2(in_fd, STDIN_FILENO) < 0)
-				child_exit(shell, 1);
+				shell_exit(shell, 1);
 			close(in_fd);
 		}
 
 		if (out_fd != STDOUT_FILENO)
 		{
 			if (dup2(out_fd, STDOUT_FILENO) < 0)
-				child_exit(shell, 1);
+				shell_exit(shell, 1);
 			close(out_fd);
 		}
 
@@ -72,13 +205,13 @@ int	execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 			close(fd);
 
 		if (apply_redirections(cmd->redirs, shell))
-			child_exit(shell, shell->exit_status);
+			shell_exit(shell, shell->exit_status);
 
 		// -------------------------
 		// 2. BUILTINS (child side)
 		// -------------------------
 		if (is_builtin(cmd->argv[0]) && !is_parent_builtin(cmd->argv[0]))
-			child_exit(shell, exec_builtin(cmd, shell));
+			shell_exit(shell, exec_builtin(cmd, shell));
 
 		// -------------------------
 		// 3. PATH RESOLUTION
@@ -90,21 +223,21 @@ int	execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 			{
 				print_exec_error(cmd->argv[0]);
 				ft_putendl_fd("No such file or directory", 2);
-				child_exit(shell, 127);
+				shell_exit(shell, 127);
 			}
 
 			if (S_ISDIR(st.st_mode))
 			{
 				print_exec_error(cmd->argv[0]);
 				ft_putendl_fd("is a directory", 2);
-				child_exit(shell, 126);
+				shell_exit(shell, 126);
 			}
 
 			if (access(cmd->argv[0], X_OK) == -1)
 			{
 				print_exec_error(cmd->argv[0]);
 				ft_putendl_fd("Permission denied", 2);
-				child_exit(shell, 126);
+				shell_exit(shell, 126);
 			}
 
 			path = ft_strdup(cmd->argv[0]);
@@ -117,7 +250,7 @@ int	execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 			{
 				print_exec_error(cmd->argv[0]);
 				ft_putendl_fd("command not found", 2);
-				child_exit(shell, 127);
+				shell_exit(shell, 127);
 			}
 		}
 
@@ -137,11 +270,11 @@ int	execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 			perror("execve");
 
 		free(path);
-		child_exit(shell, 126);
+		shell_exit(shell, 126);
 	}
 
 	return (pid);
-}
+}*/
 
 /*
 ** Fork + execute one command

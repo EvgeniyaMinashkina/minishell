@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 12:58:57 by tkoval            #+#    #+#             */
-/*   Updated: 2026/06/21 22:21:45 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/22 23:20:18 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,7 @@ char	*build_word(t_shell *shell, char *str, int *i)
 		(*i)++;
 	}
 	if (state != NONE && !shell->error_msg)
-	{
-		throw_error(shell, ERR_UNCLOSED_QUOTE);
-		return (NULL);
-	}
+		return (throw_error(shell, ERR_UNCLOSED_QUOTE), NULL);
 	if (state != NONE)
 		return (NULL);
 	buffer[j] = '\0';

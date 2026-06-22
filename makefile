@@ -35,6 +35,8 @@ SRCS = \
 	error.c \
 	execution/exec_cmd.c \
 	execution/executor.c \
+	execution/exec_utils.c \
+	execution/exec_pipe.c \
 	system/redirections.c \
 	system/heredoc.c \
 	system/signals.c \

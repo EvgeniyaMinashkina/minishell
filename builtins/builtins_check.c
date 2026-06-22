@@ -1,16 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtins.c                                         :+:      :+:    :+:   */
+/*   builtins_check.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:26 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/12 14:19:33 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/22 23:57:10 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+int	is_valid_identifier(char *str)
+{
+	int	i;
+
+	if (!str || !str[0])
+		return (0);
+	if (!(ft_isalpha(str[0]) || str[0] == '_'))
+		return (0);
+	i = 1;
+	while (str[i] && str[i] != '=')
+	{
+		if (!(ft_isalnum(str[i]) || str[i] == '_'))
+			return (0);
+		i++;
+	}
+	return (1);
+}
 
 /*
 ** Check if command is builtin

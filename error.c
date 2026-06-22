@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/26 15:38:49 by tkoval            #+#    #+#             */
-/*   Updated: 2026/06/21 22:59:52 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 01:07:10 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,39 +67,38 @@ char	*token_type_to_str(t_token *token)
 
 static char	*get_error_message(t_error_type type)
 {
-	static char	*messages[] = {
-		"syntax error: unclosed quote",
-		"syntax error: unclosed parenthesis",
-		"syntax error: unexpected token",
-		"syntax error: redirection without filename",
-		"malloc failed",
-		"command not found",
-		"permission denied",
-		"is a directory",
-		"no such file or directory",
-		"too many arguments",
-		"numeric argument required",
-		"error",
-		"syntax error: expected filename"
-	};
-	
-	return (messages[type]);
+	static char	*msg[13];
+
+	msg[0] = "syntax error: unclosed quote";
+	msg[1] = "syntax error: unclosed parenthesis";
+	msg[2] = "syntax error: unexpected token";
+	msg[3] = "syntax error: redirection without filename";
+	msg[4] = "malloc failed";
+	msg[5] = "command not found";
+	msg[6] = "permission denied";
+	msg[7] = "is a directory";
+	msg[8] = "no such file or directory";
+	msg[9] = "too many arguments";
+	msg[10] = "numeric argument required";
+	msg[11] = "error";
+	msg[12] = "syntax error: expected filename";
+	return (msg[type]);
 }
 
 int	throw_error(t_shell *shell, t_error_type type)
 {
-	const char *msg = get_error_message(type);
-	const char *prefix = "minishell: ";
-	size_t len;
+	const char	*msg;
+	const char	*prefix;
+	size_t		len;
 
+	msg = get_error_message(type);
+	prefix = "minishell: ";
 	if (!msg)
 		msg = "error";
-	// Allocate enough space for prefix + msg + null terminator
 	len = ft_strlen(prefix) + ft_strlen(msg) + 1;
 	shell->error_msg = malloc(len);
 	if (!shell->error_msg)
 		return (2);
-	// Copy prefix and concatenate message
 	ft_strlcpy(shell->error_msg, prefix, len);
 	ft_strlcat(shell->error_msg, msg, len);
 	shell->exit_status = 2;
