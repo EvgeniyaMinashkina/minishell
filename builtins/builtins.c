@@ -3,15 +3,73 @@
 /*                                                        :::      ::::::::   */
 /*   builtins.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:26 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/12 14:19:33 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/22 20:53:49 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+int	is_valid_identifier(char *str)
+{
+	int	i;
+
+	if (!str || !str[0])
+		return (0);
+	if (!(ft_isalpha(str[0]) || str[0] == '_'))
+		return (0);
+	i = 1;
+	while (str[i] && str[i] != '=')
+	{
+		if (!(ft_isalnum(str[i]) || str[i] == '_'))
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+void	export_error(char *arg)
+{
+	ft_putstr_fd("minishell: export: `", 2);
+	ft_putstr_fd(arg, 2);
+	ft_putendl_fd("': not a valid identifier", 2);
+}
+
+static int	builtin_export(char **argv, t_shell *shell)
+{
+	int		i;
+	char	*eq;
+	int		status;
+
+	if (!argv[1])
+		return (builtin_env(shell->envp));
+	status = 0;
+	i = 1;
+	while (argv[i])
+	{
+		if (!is_valid_identifier(argv[i]))
+		{
+			export_error(argv[i]);
+			status = 1;
+			i++;
+			continue ;
+		}
+		eq = ft_strchr(argv[i], '=');
+		if (eq)
+		{
+			*eq = '\0';
+			env_set(&shell->envp,
+				argv[i],
+				eq + 1);
+			*eq = '=';
+		}
+		i++;
+	}
+	return (status);
+}
+/*
 static int	builtin_export(char **argv, t_shell *shell)
 {
 	char	*eq;
@@ -25,7 +83,7 @@ static int	builtin_export(char **argv, t_shell *shell)
 	env_set(&shell->envp, argv[1], eq + 1);
 	*eq = '=';
 	return (0);
-}
+}*/
 
 static int	builtin_unset(char **argv, t_shell *shell)
 {
@@ -76,7 +134,7 @@ static int	builtin_exit(char **argv, t_shell *shell)
 		ft_putstr_fd("exit: ", 2);
 		ft_putstr_fd(argv[1], 2);
 		ft_putendl_fd(": numeric argument required", 2);
-		shell_exit(shell, 2);
+		shell_exit(shell, 255);
 	}
 	if (argv[1] && argv[2])
 	{

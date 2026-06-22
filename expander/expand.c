@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 14:59:44 by tkoval            #+#    #+#             */
-/*   Updated: 2026/04/29 15:26:05 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/22 22:37:00 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,38 @@
 void	expand_redirs(t_cmd *cmd, t_shell *shell)
 {
 	t_redir	*tmp;
+	char	*new_filename;
 
 	tmp = cmd->redirs;
 	while (tmp)
 	{
-		tmp->filename = expand_string(tmp->filename, shell);
+		new_filename = expand_string(tmp->filename, shell);
+		free(tmp->filename);
+		tmp->filename = new_filename;
 		tmp = tmp->next;
 	}
+}
+
+static void	clean_empty_args(t_cmd *cmd)
+{
+	int i = 0;
+	int j = 0;
+
+	while (cmd->argv[i])
+	{
+		if (cmd->argv[i][0] != '\0')
+			cmd->argv[j++] = cmd->argv[i];
+		else
+			free(cmd->argv[i]);
+		i++;
+	}
+	cmd->argv[j] = NULL;
 }
 
 void	expand_cmds(t_shell *shell)
 {
 	t_cmd	*tmp;
+	char	*new_str;
 	int		i;
 
 	tmp = shell->cmd_list;
@@ -35,11 +55,14 @@ void	expand_cmds(t_shell *shell)
 		i = 0;
 		while (tmp->argv[i])
 		{
-			tmp->argv[i] = expand_string(tmp->argv[i], shell);
+			new_str = expand_string(tmp->argv[i], shell);
+			free(tmp->argv[i]);
+			tmp->argv[i] = new_str;
 			i++;
 		}
 		if (tmp->redirs)
 			expand_redirs(tmp, shell);
 		tmp = tmp->next;
 	}
+	clean_empty_args(shell->cmd_list);
 }

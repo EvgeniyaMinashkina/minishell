@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 15:08:14 by tkoval            #+#    #+#             */
-/*   Updated: 2026/06/21 20:48:39 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/22 14:53:40 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,10 +65,10 @@ char	*expand_string(char *str, t_shell *shell)
 	t_quote_state	quote;
 
 	i = 0;
-	res = ft_strdup("");
 	quote = NONE;
 	if (!str)
 		return (NULL);
+	res = ft_strdup("");
 	while (str[i])
 	{
 		handle_quotes(str, &i, &quote, &res);

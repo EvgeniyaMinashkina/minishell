@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_cmd.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:15:42 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/12 14:20:47 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/22 23:09:24 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,6 +173,8 @@ int	execute_pipeline(t_cmd *cmd_list, t_shell *shell)
 		update_fds(&prev_fd, cmd, pipefd);
 		cmd = cmd->next;
 	}
+	if (prev_fd != STDIN_FILENO)
+		close(prev_fd);
 	wait_last_pid(last_pid, shell);
 	return (0);
 }

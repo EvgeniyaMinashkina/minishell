@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/29 15:09:46 by tkoval            #+#    #+#             */
-/*   Updated: 2026/04/29 15:24:27 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/22 14:44:15 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ char	*ft_strljoin(char const *dest, char const *src, size_t len)
 
 	i = 0;
 	k = 0;
+	if (!dest)
+		dest = "";
 	dest_len = ft_strlen(dest);
 	res_len = dest_len + len +1;
 	res = (char *)malloc(sizeof(char) * res_len);
