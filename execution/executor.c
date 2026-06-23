@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:16:12 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 00:56:02 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 12:52:26 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ static char	*resolve_direct_path(char *arg, struct stat *st)
 	if (S_ISDIR(st->st_mode))
 	{
 		print_exec_error(arg);
-		ft_putendl_fd("is a directory", 2);
+		ft_putendl_fd("Is a directory", 2);
 		exit(126);
 	}
 	if (access(arg, X_OK) == -1)

@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:26 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 00:07:43 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 13:11:45 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ static int	builtin_exit(char **argv, t_shell *shell)
 		ft_putstr_fd("exit: ", 2);
 		ft_putstr_fd(argv[1], 2);
 		ft_putendl_fd(": numeric argument required", 2);
-		shell_exit(shell, 255);
+		shell_exit(shell, 2);
 	}
 	if (argv[1] && argv[2])
 	{
