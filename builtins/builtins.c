@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:26 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 16:23:18 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/23 19:16:27 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,12 @@ static int	builtin_exit(char **argv, t_shell *shell)
 {
 	int	status;
 
-	printf("exit\n");
+	if (argv[1] && argv[2])
+	{
+		ft_putendl_fd("exit: too many arguments", 2);
+		shell->exit_status = 1;
+		return (1);
+	}
 	if (argv[1] && !is_valid_exit_number(argv[1]))
 	{
 		ft_putstr_fd("exit: ", 2);
@@ -108,12 +113,7 @@ static int	builtin_exit(char **argv, t_shell *shell)
 		ft_putendl_fd(": numeric argument required", 2);
 		shell_exit(shell, 2);
 	}
-	if (argv[1] && argv[2])
-	{
-		ft_putendl_fd("exit: too many arguments", 2);
-		shell->exit_status = 1;
-		return (1);
-	}
+	printf("exit\n");
 	if (argv[1])
 		status = ft_atoi(argv[1]);
 	else
