@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/26 15:38:49 by tkoval            #+#    #+#             */
-/*   Updated: 2026/06/23 01:07:10 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 18:36:37 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,6 @@ char	*token_type_to_str(t_token *token)
 		return (token->value);
 	if (token->type == PIPE)
 		return ("|");
-	if (token->type == AND)
-		return ("&&");
-	if (token->type == OR)
-		return ("||");
 	if (token->type == REDIR_IN)
 		return ("<");
 	if (token->type == REDIR_OUT)
@@ -58,10 +54,6 @@ char	*token_type_to_str(t_token *token)
 		return (">>");
 	if (token->type == HEREDOC)
 		return ("<<");
-	if (token->type == LPAREN)
-		return ("(");
-	if (token->type == RPAREN)
-		return (")");
 	return ("newline");
 }
 

@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/26 15:24:54 by tkoval            #+#    #+#             */
-/*   Updated: 2026/03/09 14:54:32 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 18:35:30 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	is_binary_operator(t_token *token)
 {
-	if (token->type == PIPE || token->type == AND || token->type == OR)
+	if (token->type == PIPE)
 		return (1);
 	return (0);
 }
@@ -41,8 +41,6 @@ int	syntax_check(t_shell *shell)
 	curr = shell->tokens;
 	if (!curr)
 		return (0);
-	if (check_parenthesis(shell) != 0)
-		return (2);
 	if (is_binary_operator(curr))
 		return (syntax_error_token(shell, token_type_to_str(curr)));
 	while (curr)

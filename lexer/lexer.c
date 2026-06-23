@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 12:58:57 by tkoval            #+#    #+#             */
-/*   Updated: 2026/06/22 23:20:18 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 18:36:16 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,20 +76,12 @@ t_token	*add_operator_token(t_token **head, char *str, t_quote_state state)
 		new_token = add_new_token(head, HEREDOC, NULL, state);
 	else if (!ft_strncmp(str, ">>", 2))
 		new_token = add_new_token(head, APPEND, NULL, state);
-	else if (!ft_strncmp(str, "&&", 2))
-		new_token = add_new_token(head, AND, NULL, state);
-	else if (!ft_strncmp(str, "||", 2))
-		new_token = add_new_token(head, OR, NULL, state);
 	else if (*str == '|')
 		new_token = add_new_token(head, PIPE, NULL, state);
 	else if (*str == '<')
 		new_token = add_new_token(head, REDIR_IN, NULL, state);
 	else if (*str == '>')
 		new_token = add_new_token(head, REDIR_OUT, NULL, state);
-	else if (*str == '(')
-		new_token = add_new_token(head, LPAREN, NULL, state);
-	else if (*str == ')')
-		new_token = add_new_token(head, RPAREN, NULL, state);
 	return (new_token);
 }
 

@@ -3,15 +3,12 @@ NAME = minishell
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
-# Автоматическое определение ОС (Mac или Linux/Windows WSL)
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S), Darwin)
-	# Настройки для macOS (процессоры Apple Silicon)
 	CFLAGS  += -I/opt/homebrew/opt/readline/include
 	LDFLAGS = -L/opt/homebrew/opt/readline/lib -lreadline
 else
-	# Настройки для Windows WSL / Linux (readline обычно предустановлен в системе)
 	LDFLAGS = -lreadline
 endif
 
@@ -23,7 +20,6 @@ SRCS = \
 	lexer/lexer.c \
 	lexer/helper.c \
 	syntax/syntax_check.c \
-	syntax/parenthesis_check.c \
 	parser/parser.c \
 	parser/parser_helpers.c \
 	parser/print_parsed.c \

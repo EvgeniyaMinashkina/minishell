@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 16:53:43 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/23 18:35:41 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,10 +44,6 @@ typedef enum e_token_type
 	REDIR_OUT,
 	APPEND,
 	HEREDOC,
-	AND,
-	OR,
-	LPAREN,
-	RPAREN
 }	t_token_type;
 
 typedef struct s_token

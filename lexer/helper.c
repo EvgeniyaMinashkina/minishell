@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:04:04 by tkoval            #+#    #+#             */
-/*   Updated: 2026/04/29 14:46:30 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 18:38:24 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,7 @@ int	is_operator(char *str)
 		return (2);
 	if (!ft_strncmp(str, ">>", 2))
 		return (2);
-	if (!ft_strncmp(str, "&&", 2))
-		return (2);
-	if (!ft_strncmp(str, "||", 2))
-		return (2);
-	if (*str == '|' || *str == '<' || *str == '>' || *str == '(' || *str == ')')
+	if (*str == '|' || *str == '<' || *str == '>')
 		return (1);
 	return (0);
 }
