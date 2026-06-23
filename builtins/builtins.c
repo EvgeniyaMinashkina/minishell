@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:26 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 14:28:27 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/23 16:23:18 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,43 +87,6 @@ static int	builtin_cd(char **argv, t_shell *shell)
 	}
 	return (0);
 }*/
-
-static int builtin_cd(char **argv, t_shell *shell)
-{
-	char	*oldpwd;
-	char	*path;
-	char	cwd[4096];
-
-	oldpwd = env_get(shell->envp, "PWD");
- 	// cd -
-	if (argv[1] && !ft_strncmp(argv[1], "-", 2))
-	{
-		path = env_get(shell->envp, "OLDPWD");
-		if (!path)
-			return (ft_putendl_fd("cd: OLDPWD not set", 2), 1);
-		printf("%s\n", path);
-	}
-	else if (!argv[1])
-		path = env_get(shell->envp, "HOME");
-	else
-		path = argv[1];
-
-	if (!path)
-		return (ft_putendl_fd("cd: HOME not set", 2), 1);
-
-	if (chdir(path) != 0)
-	{
-		perror("cd");
-		return (1);
-	}
-	// update OLDPWD
-	if (oldpwd)
-		env_set(&shell->envp, "OLDPWD", oldpwd);
-	// update PWD
-	if (getcwd(cwd, sizeof(cwd)))
-		env_set(&shell->envp, "PWD", cwd);
-	return (0);
-}
 
 /*
 ** Exit builtin

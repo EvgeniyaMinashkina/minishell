@@ -43,6 +43,7 @@ SRCS = \
 	system/path.c \
 	builtins/builtins_check.c \
 	builtins/builtins_utils.c \
+	builtins/builtin_cd.c \
 	builtins/builtins.c \
 	builtins/env.c \
 	builtins/env_utils.c \
