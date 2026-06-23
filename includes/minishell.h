@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 16:23:53 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/23 16:53:43 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 # include <limits.h>
+# include <sys/stat.h>
 # include "libft.h"
 
 extern volatile sig_atomic_t	g_signal;
@@ -162,6 +163,8 @@ void	toggle_or_add_quote(t_quote_state *quote, char c, char **res);
 /*                                 EXECUTOR                                   */
 /* ************************************************************************** */
 
+void	print_exec_error(char *cmd);
+char	*resolve_path(t_cmd *cmd, t_shell *shell);
 int		execute_single_command(t_cmd *cmd, t_shell *shell);
 void	wait_last_pid(pid_t last_pid, t_shell *shell);
 int		execute_pipeline(t_cmd *cmd_list, t_shell *shell);

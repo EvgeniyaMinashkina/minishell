@@ -3,26 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
+/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:16:12 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 12:52:26 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/23 16:52:40 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-#include <sys/stat.h> //TODO
-
-/*static void	child_exit(t_shell *shell, int status)
-{
-	shell_exit(shell, status);
-}*/
-
-static void	print_exec_error(char *cmd)
-{
-	ft_putstr_fd(cmd, 2);
-	ft_putstr_fd(": ", 2);
-}
 
 /*
 execute_pipeline
@@ -42,7 +30,6 @@ static void	input_output_setup(t_shell *shell, int *in_fd, int *out_fd)
 			shell_exit(shell, 1);
 		close(*in_fd);
 	}
-
 	if (*out_fd != STDOUT_FILENO)
 	{
 		if (dup2(*out_fd, STDOUT_FILENO) < 0)
@@ -51,7 +38,7 @@ static void	input_output_setup(t_shell *shell, int *in_fd, int *out_fd)
 	}
 }
 
-/*// 🔥 CRITICAL FIX #1:
+// CRITICAL FIX #1:
 // закрываем ВСЕ лишние pipe fd, которые могли унаследоваться
 // иначе yes | head висит*/
 void	close_odd_pipes(void)
@@ -66,69 +53,19 @@ void	close_odd_pipes(void)
 	}
 }
 
+// struct stat	st;
 static void	exec_process(t_cmd *cmd, char *path, t_shell *shell)
 {
-	// struct stat	st;
-
 	execve(path, cmd->argv, shell->envp);
-
 	print_exec_error(cmd->argv[0]);
-
 	if (errno == EACCES)
 		ft_putendl_fd("Permission denied", 2);
 	else if (errno == EISDIR)
 		ft_putendl_fd("is a directory", 2);
 	else
 		perror("execve");
-
 	free(path);
 	shell_exit(shell, 126);
-}
-
-static char	*resolve_from_env(char *cmd, t_shell *shell)
-{
-	char	*path;
-
-	path = find_cmd_path(cmd, shell->envp);
-	if (!path)
-	{
-		print_exec_error(cmd);
-		ft_putendl_fd("command not found", 2);
-		exit(127);
-	}
-	return (path);
-}
-
-static char	*resolve_direct_path(char *arg, struct stat *st)
-{
-	if (stat(arg, st) != 0)
-	{
-		print_exec_error(arg);
-		ft_putendl_fd("No such file or directory", 2);
-		exit(127);
-	}
-	if (S_ISDIR(st->st_mode))
-	{
-		print_exec_error(arg);
-		ft_putendl_fd("Is a directory", 2);
-		exit(126);
-	}
-	if (access(arg, X_OK) == -1)
-	{
-		print_exec_error(arg);
-		ft_putendl_fd("Permission denied", 2);
-		exit(126);
-	}
-	return (ft_strdup(arg));
-}
-
-static char	*resolve_path(t_cmd *cmd, t_shell *shell)
-{
-	struct stat	st;
-
-	if (ft_strchr(cmd->argv[0], '/') != NULL)
-		return (resolve_direct_path(cmd->argv[0], &st));
-	return (resolve_from_env(cmd->argv[0], shell));
 }
 
 static void	execute_child(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
@@ -138,16 +75,12 @@ static void	execute_child(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 	init_signals_child();
 	if (!cmd || !cmd->argv || !cmd->argv[0])
 		shell_exit(shell, 0);
-
 	input_output_setup(shell, &in_fd, &out_fd);
 	close_odd_pipes();
-
 	if (apply_redirections(cmd->redirs, shell))
 		shell_exit(shell, shell->exit_status);
-
 	if (is_builtin(cmd->argv[0]) && !is_parent_builtin(cmd->argv[0]))
 		shell_exit(shell, exec_builtin(cmd, shell));
-
 	path = resolve_path(cmd, shell);
 	exec_process(cmd, path, shell);
 }

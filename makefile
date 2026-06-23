@@ -34,6 +34,7 @@ SRCS = \
 	expander/ft_strljoin.c \
 	error.c \
 	execution/exec_cmd.c \
+	execution/exec_helpers.c \
 	execution/executor.c \
 	execution/exec_utils.c \
 	execution/exec_pipe.c \
