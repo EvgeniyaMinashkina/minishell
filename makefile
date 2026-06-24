@@ -71,4 +71,11 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+valgrind: all
+	valgrind --leak-check=full \
+		--track-origins=yes \
+		--show-leak-kinds=all \
+		--suppressions=readline.supp \
+		./$(NAME)
+
+.PHONY: all clean fclean re valgrind
