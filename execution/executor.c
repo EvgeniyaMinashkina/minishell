@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:16:12 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 18:41:59 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/06/24 11:33:31 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,22 +73,14 @@ static void	execute_child(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 	char	*path;
 
 	init_signals_child();
-	//printf("DEBUG argv[0] = [%s]\n", cmd->argv[0]);
 	if (!cmd || !cmd->argv || !cmd->argv[0])
 		shell_exit(shell, 0);
 	input_output_setup(shell, &in_fd, &out_fd);
 	close_odd_pipes();
 	if (apply_redirections(cmd->redirs, shell))
 		shell_exit(shell, shell->exit_status);
-	//printf("CHECK builtin: [%s]\n", cmd->argv[0]);
-	//printf("is_builtin = %d\n", is_builtin(cmd->argv[0]));
-	//printf("is_parent_builtin = %d\n", is_parent_builtin(cmd->argv[0]));
-	if (is_builtin(cmd->argv[0])) //
-	{
-		shell_exit(shell, exec_builtin(cmd, shell)); //
-	} 
-	//if (is_builtin(cmd->argv[0]) && !is_parent_builtin(cmd->argv[0]))
-	//shell_exit(shell, exec_builtin(cmd, shell));
+	if (is_builtin(cmd->argv[0]))
+		shell_exit(shell, exec_builtin(cmd, shell));
 	path = resolve_path(cmd, shell);
 	exec_process(cmd, path, shell);
 }

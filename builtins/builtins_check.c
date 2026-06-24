@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins_check.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
+/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:26 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/22 23:57:10 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/24 11:32:51 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,4 +55,33 @@ int	is_parent_builtin(char *cmd)
 		|| !ft_strncmp(cmd, "export", 7)
 		|| !ft_strncmp(cmd, "unset", 6)
 		|| !ft_strncmp(cmd, "exit", 5));
+}
+
+int	is_valid_exit_number(char *str)
+{
+	int			sign;
+	int			i;
+	long long	res;
+
+	i = 0;
+	sign = 1;
+	res = 0;
+	if (!str || !str[0])
+		return (0);
+	if (str[i] == '-')
+		sign = -1;
+	if (str[i] == '+' || str[i] == '-')
+		i++;
+	if (!str[i])
+		return (0);
+	while (str[i])
+	{
+		if (!ft_isdigit(str[i]) || (res > LLONG_MAX / 10
+				|| (res == LLONG_MAX / 10
+					&& str[i] - '0' > LLONG_MAX % 10 + (sign < 0))))
+			return (0);
+		res = res * 10 + (str[i] - '0');
+		i++;
+	}
+	return (1);
 }
