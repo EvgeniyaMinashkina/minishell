@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 13:12:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 16:18:20 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/06/24 16:27:27 by tkoval           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,68 @@ static void	print_error(t_shell *shell)
 	shell->error_msg = NULL;
 	free_tokens(shell->tokens);
 	return ;
+}
+
+int	unclosed_quote(char *str)
+{
+	t_quote_state	q;
+	int				i;
+
+	i = 0;
+	q = NONE;
+	if (!str)
+		return (0);
+	while (str[i])
+	{
+		if (str[i] == '\'' && q == NONE)
+			q = SINGLE_QUOTE;
+		else if (str[i] == '\'' && q == SINGLE_QUOTE)
+			q = NONE;
+		else if (str[i] == '"' && q == NONE)
+			q = DOUBLE_QUOTE;
+		else if (str[i] == '"' && q == DOUBLE_QUOTE)
+			q = NONE;
+		i++;
+	}
+	return (q != NONE);
+}
+
+static void	sigint_dquote(int sig)
+{
+	(void)sig;
+	g_signal = SIGINT;
+	write(1, "\n", 1);
+	rl_replace_line("", 0);
+	rl_done = 1;
+}
+
+char	*read_multiline(char *line)
+{
+	char	*tmp;
+	char	*new;
+
+	while (unclosed_quote(line))
+	{
+		signal(SIGINT, sigint_dquote);
+		tmp = readline("dquote> ");
+		if (g_signal == SIGINT)
+		{
+			g_signal = 0;
+			free(tmp);
+			free(line);
+			init_signals_prompt();
+			return (NULL);
+		}
+		if (!tmp)
+			break ;
+		new = ft_strjoin(line, "\n");
+		free(line);
+		line = ft_strjoin(new, tmp);
+		free(new);
+		free(tmp);
+	}
+	init_signals_prompt();
+	return (line);
 }
 
 static void	process_input(t_shell *shell, char *line)
@@ -62,16 +124,25 @@ static void	shell_loop(t_shell *shell)
 	while (1)
 	{
 		line = readline("minishell$ ");
-		if (g_signal == SIGINT)
-		{
-			shell->exit_status = 130;
-			g_signal = 0;
-		}
 		if (!line)
 		{
 			printf("exit\n");
 			shell_exit(shell, shell->exit_status);
 		}
+		if (unclosed_quote(line))
+			line = read_multiline(line);
+		if (!line)
+		{
+			shell->exit_status = 130;
+			continue ;
+		}
+		// if (g_signal == SIGINT)
+		// {
+		// 	shell->exit_status = 130;
+		// 	g_signal = 0;
+		// 	if (!line)
+		// 		continue ;
+		// }
 		if (*line)
 			add_history(line);
 		process_input(shell, line);
