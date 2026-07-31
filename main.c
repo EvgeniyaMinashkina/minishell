@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 13:12:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 16:18:20 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/07/31 23:45:21 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,9 @@ static void	print_error(t_shell *shell)
 	free(shell->error_msg);
 	shell->error_msg = NULL;
 	free_tokens(shell->tokens);
-	return ;
+	shell->tokens = NULL;
+	free_cmds(shell->cmd_list);
+	shell->cmd_list = NULL;
 }
 
 static void	process_input(t_shell *shell, char *line)
@@ -33,7 +35,10 @@ static void	process_input(t_shell *shell, char *line)
 		return (print_error(shell));
 	shell->cmd_list = parse_tokens(shell);
 	if (shell->error_msg)
-		return (print_error(shell));
+	{
+		print_error(shell);
+		return ;
+	}
 	if (!shell->cmd_list)
 		return ;
 	expand_cmds(shell);

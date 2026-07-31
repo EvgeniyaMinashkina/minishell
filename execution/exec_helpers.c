@@ -20,37 +20,22 @@ void	print_exec_error(char *cmd)
 
 static char	*resolve_from_env(char *cmd, t_shell *shell)
 {
-	char	*path;
-
-	path = find_cmd_path(cmd, shell->envp);
-	if (!path)
-	{
-		print_exec_error(cmd);
-		ft_putendl_fd("command not found", 2);
-		exit(127);
-	}
-	return (path);
+	return (find_cmd_path(cmd, shell->envp));
 }
 
 static char	*resolve_direct_path(char *arg, struct stat *st)
 {
 	if (stat(arg, st) != 0)
-	{
-		print_exec_error(arg);
-		ft_putendl_fd("No such file or directory", 2);
-		exit(127);
-	}
+		return (NULL);
 	if (S_ISDIR(st->st_mode))
 	{
-		print_exec_error(arg);
-		ft_putendl_fd("Is a directory", 2);
-		exit(126);
+		errno = EISDIR;
+		return (NULL);
 	}
 	if (access(arg, X_OK) == -1)
 	{
-		print_exec_error(arg);
-		ft_putendl_fd("Permission denied", 2);
-		exit(126);
+		errno = EACCES;
+		return (NULL);
 	}
 	return (ft_strdup(arg));
 }
