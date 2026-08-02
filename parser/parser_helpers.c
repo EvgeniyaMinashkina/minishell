@@ -25,7 +25,7 @@ t_cmd	*new_cmd(void)
 	return (cmd);
 }
 
-static t_redir	*new_redir(t_token_type type, char *filename)
+static t_redir	*new_redir(t_token_type type, char *filename, bool expand)
 {
 	t_redir	*new;
 
@@ -34,18 +34,20 @@ static t_redir	*new_redir(t_token_type type, char *filename)
 		return (NULL);
 	new->filename = ft_strdup(filename);
 	new->type = type;
+	new->expand = expand;
 	new->next = NULL;
 	return (new);
 }
 
-void	add_redir(t_cmd *cmd, t_token_type type, char *filename)
+void	add_redir(t_cmd *cmd, t_token_type type,
+				char *filename, bool expand)
 {
 	t_redir	*new;
 	t_redir	*tmp;
 
 	if (!cmd)
 		return ;
-	new = new_redir(type, filename);
+	new = new_redir(type, filename, expand);
 	if (!new)
 		return ;
 	if (cmd->redirs == NULL)

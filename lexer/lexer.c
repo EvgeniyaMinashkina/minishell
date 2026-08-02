@@ -12,22 +12,28 @@
 
 #include "minishell.h"
 
-char	*build_word(t_shell *shell, char *str, int *i)
+char	*build_word(t_shell *shell, char *str, int *i, t_quote_state *quote_state)
 {
 	t_quote_state	state;
 	char			*result;
 	char			buffer[10000];
 	int				j;
+	bool			quoted;
 
 	state = NONE;
+	quoted = false;
 	j = 0;
 	while (str[*i])
 	{
 		if (state == NONE && (is_space(str[*i]) || is_operator(&str[*i])))
 			break ;
 		if ((str[*i] == '\'' && state != DOUBLE_QUOTE)
-			|| (str[*i] == '\"' && state != SINGLE_QUOTE))
+			|| (str[*i] == '"' && state != SINGLE_QUOTE))
+		{
+			if (state == NONE)
+				quoted = true;
 			toggle_quote_state(&state, str[*i]);
+		}
 		buffer[j++] = str[*i];
 		(*i)++;
 	}
@@ -35,6 +41,10 @@ char	*build_word(t_shell *shell, char *str, int *i)
 		return (throw_error(shell, ERR_UNCLOSED_QUOTE), NULL);
 	if (state != NONE)
 		return (NULL);
+	if (quoted)
+		*quote_state = DOUBLE_QUOTE;
+	else
+		*quote_state = NONE;
 	buffer[j] = '\0';
 	result = ft_strdup(buffer);
 	return (result);
@@ -87,9 +97,10 @@ t_token	*add_operator_token(t_token **head, char *str, t_quote_state state)
 
 t_token	*lexer(t_shell *shell, char *str)
 {
-	int			i;
-	t_token		*head;
-	char		*curr_word;
+	int				i;
+	t_token			*head;
+	char			*curr_word;
+	t_quote_state	quote_state;
 
 	i = 0;
 	head = NULL;
@@ -104,10 +115,10 @@ t_token	*lexer(t_shell *shell, char *str)
 		}
 		else
 		{
-			curr_word = build_word(shell, str, &i);
+			curr_word = build_word(shell, str, &i, &quote_state);
 			if (!curr_word || shell->error_msg)
 				return (free_tokens(head), NULL);
-			add_new_token(&head, WORD, curr_word, NONE);
+			add_new_token(&head, WORD, curr_word, quote_state);
 		}
 	}
 	return (head);

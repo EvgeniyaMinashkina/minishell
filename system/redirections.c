@@ -48,7 +48,7 @@ static int	get_redir_fd(t_redir *r, t_shell *shell,
 {
 	if (r->type == HEREDOC)
 	{
-		*fd = heredoc_pipe(r->filename, shell);
+		*fd = heredoc_pipe(r->filename, r->expand, shell);
 		*target = STDIN_FILENO;
 		if (*fd < 0)
 		{

@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/24 11:36:12 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/02 22:56:12 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ typedef struct s_redir
 {
 	t_token_type	type;
 	char			*filename;
+	bool			expand;
 	struct s_redir	*next;
 }	t_redir;
 
@@ -123,7 +124,7 @@ void	print_cmds(t_cmd *cmd_list);
 
 /* parser/parser_helpers.c */
 t_cmd	*new_cmd(void);
-void	add_redir(t_cmd *cmd, t_token_type type, char *filename);
+void	add_redir(t_cmd *cmd, t_token_type type, char *filename, bool expand);
 void	add_argv(t_cmd *cmd, char *value);
 void	add_cmd_back(t_cmd **cmd_list, t_cmd *new_cmd);
 
@@ -191,7 +192,8 @@ int		exec_builtin(t_cmd *cmd, t_shell *shell);
 /* ************************************************************************** */
 
 int		apply_redirections(t_redir *redirs, t_shell *shell);
-int		heredoc_pipe(char *delim, t_shell *shell);
+int		heredoc_pipe(char *delim, bool expand, t_shell *shell);
+
 
 /* ************************************************************************** */
 /*                                   PATH                                     */

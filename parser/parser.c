@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 14:39:42 by tkoval            #+#    #+#             */
-/*   Updated: 2026/06/22 23:40:21 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/08/01 23:31:21 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ static int	handle_token(t_shell *shell, t_cmd *cmd,
 		*head = (*head)->next;
 		if (!*head || (*head)->type != WORD)
 			return (handle_error(shell, ERR_GENERAL, &cmd_list), 0);
-		add_redir(cmd, redir_type, (*head)->value);
+		add_redir(cmd, redir_type, (*head)->value, (*head)->quote_state == NONE);
 	}
 	return (1);
 }

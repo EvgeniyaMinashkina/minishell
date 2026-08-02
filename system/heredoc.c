@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-static void	heredoc_child(char *delim, int write_fd, t_shell *shell)
+static void heredoc_child(char *delim, int write_fd, bool expand, t_shell *shell)
 {
 	char	*line;
 	char	*expanded;
@@ -29,17 +29,22 @@ static void	heredoc_child(char *delim, int write_fd, t_shell *shell)
 			free(line);
 			break ;
 		}
-		expanded = expand_string(line, shell);
-		write(write_fd, expanded, ft_strlen(expanded));
+		if (expand)
+		{
+			expanded = expand_string(line, shell);
+			write(write_fd, expanded, ft_strlen(expanded));
+			free(expanded);
+		}
+		else
+			write(write_fd, line, ft_strlen(line));
 		write(write_fd, "\n", 1);
-		free(expanded);
 		free(line);
 	}
 	close(write_fd);
 	exit(0);
 }
 
-int	heredoc_pipe(char *delim, t_shell *shell)
+int	heredoc_pipe(char *delim, bool expand, t_shell *shell)
 {
 	int		fd[2];
 	pid_t	pid;
@@ -53,7 +58,7 @@ int	heredoc_pipe(char *delim, t_shell *shell)
 	if (pid == 0)
 	{
 		close(fd[0]);
-		heredoc_child(delim, fd[1], shell);
+		heredoc_child(delim, fd[1], expand, shell);
 	}
 	close(fd[1]);
 	waitpid(pid, &status, 0);
