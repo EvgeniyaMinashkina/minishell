@@ -27,6 +27,10 @@ static void	print_error(t_shell *shell)
 
 static void	process_input(t_shell *shell, char *line)
 {
+	if (!line || !*line)
+		return ;
+	shell->tokens = NULL;
+	shell->cmd_list = NULL;
 	shell->tokens = lexer(shell, line);
 	if (shell->error_msg)
 		return (print_error(shell));
@@ -35,10 +39,7 @@ static void	process_input(t_shell *shell, char *line)
 		return (print_error(shell));
 	shell->cmd_list = parse_tokens(shell);
 	if (shell->error_msg)
-	{
-		print_error(shell);
-		return ;
-	}
+		return (print_error(shell));
 	if (!shell->cmd_list)
 		return ;
 	expand_cmds(shell);
@@ -67,6 +68,8 @@ static void	shell_loop(t_shell *shell)
 	while (1)
 	{
 		line = readline("minishell$ ");
+		if (line)
+			line = read_complete_input(line);
 		if (g_signal == SIGINT)
 		{
 			shell->exit_status = 130;
@@ -77,8 +80,12 @@ static void	shell_loop(t_shell *shell)
 			printf("exit\n");
 			shell_exit(shell, shell->exit_status);
 		}
-		if (*line)
-			add_history(line);
+		if (*line == '\0')
+		{
+			free(line);
+			continue ;
+		}
+		add_history(line);
 		process_input(shell, line);
 		free(line);
 	}

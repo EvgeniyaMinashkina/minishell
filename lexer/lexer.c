@@ -31,10 +31,10 @@ char	*build_word(t_shell *shell, char *str, int *i)
 		buffer[j++] = str[*i];
 		(*i)++;
 	}
-	if (state != NONE && !shell->error_msg)
-		return (throw_error(shell, ERR_UNCLOSED_QUOTE), NULL);
-	if (state != NONE)
-		return (NULL);
+	// if (state != NONE && !shell->error_msg)
+	// 	return (throw_error(shell, ERR_UNCLOSED_QUOTE), NULL);
+	// if (state != NONE)
+	// 	return (NULL);
 	buffer[j] = '\0';
 	result = ft_strdup(buffer);
 	return (result);

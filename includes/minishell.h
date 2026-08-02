@@ -225,4 +225,7 @@ void	free_cmds(t_cmd *cmds);
 void	free_redirs(t_redir *redirs);
 void	shell_exit(t_shell *shell, int status);
 
+char	*read_continuation_line(void);
+char	*read_complete_input(char *line);
+
 #endif
