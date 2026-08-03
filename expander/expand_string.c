@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expand_string.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
+/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 15:08:14 by tkoval            #+#    #+#             */
-/*   Updated: 2026/06/22 14:53:40 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/08/03 18:21:56 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,15 @@
 
 void	single_quote_text_adding(char *str, int *i, char **res)
 {
-	int	start;
+	int		start;
+	char	*tmp;
 
 	start = *i;
 	while (str[*i] && str[*i] != '\'')
 		(*i)++;
-	append_str(res, ft_substr(str, start, *i - start));
+	tmp = ft_substr(str, start, *i - start);
+	append_str(res, tmp);
+	free(tmp);
 }
 
 static void	expand_var(char *str, int *i, t_shell *shell, char **res)
