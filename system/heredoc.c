@@ -6,11 +6,45 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:14:22 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 13:44:26 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/03 13:34:01 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+static void	heredoc_sigint(int sig)
+{
+	(void)sig;
+	g_signal = SIGINT;
+	close(STDIN_FILENO);
+}
+
+static int	wait_heredoc(pid_t pid, int read_fd, t_shell *shell)
+{
+	int	status;
+
+	while (waitpid(pid, &status, 0) == -1)
+	{
+		if (errno != EINTR)
+		{
+			close(read_fd);
+			return (-1);
+		}
+	}
+	if (WIFEXITED(status) && WEXITSTATUS(status) == 130)
+	{
+		close(read_fd);
+		shell->exit_status = 130;
+		return (-1);
+	}
+	if (WIFSIGNALED(status))
+	{
+		close(read_fd);
+		shell->exit_status = 128 + WTERMSIG(status);
+		return (-1);
+	}
+	return (read_fd);
+}
 
 static void	write_heredoc_line(char *line, int write_fd,
 	bool expand, t_shell *shell)
@@ -33,10 +67,16 @@ static void	heredoc_child(char *delim, int write_fd,
 {
 	char	*line;
 
-	signal(SIGINT, SIG_DFL);
+	g_signal = 0;
+	signal(SIGINT, heredoc_sigint);
 	while (1)
 	{
 		line = readline("> ");
+		if (g_signal == SIGINT)
+		{
+			close(write_fd);
+			shell_exit(shell, 130);
+		}
 		if (!line)
 			break ;
 		if (ft_strncmp(line, delim, ft_strlen(delim) + 1) == 0)
@@ -48,32 +88,28 @@ static void	heredoc_child(char *delim, int write_fd,
 		free(line);
 	}
 	close(write_fd);
-	exit(0);
+	shell_exit(shell, 0);
 }
 
 int	heredoc_pipe(char *delim, bool expand, t_shell *shell)
 {
 	int		fd[2];
 	pid_t	pid;
-	int		status;
 
 	if (pipe(fd) == -1)
 		return (-1);
 	pid = fork();
 	if (pid < 0)
+	{
+		close(fd[0]);
+		close(fd[1]);
 		return (-1);
+	}
 	if (pid == 0)
 	{
 		close(fd[0]);
 		heredoc_child(delim, fd[1], expand, shell);
 	}
 	close(fd[1]);
-	waitpid(pid, &status, 0);
-	if (WIFSIGNALED(status))
-	{
-		close(fd[0]);
-		shell->exit_status = 130;
-		return (-1);
-	}
-	return (fd[0]);
+	return (wait_heredoc(pid, fd[0], shell));
 }
