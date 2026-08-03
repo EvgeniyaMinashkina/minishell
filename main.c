@@ -72,11 +72,21 @@ static void	shell_loop(t_shell *shell)
 		{
 			shell->exit_status = 130;
 			g_signal = 0;
+			rl_on_new_line();
+			rl_replace_line("", 0);
 		}
 		if (!line)
 		{
 			printf("exit\n");
 			shell_exit(shell, shell->exit_status);
+		}
+		line = read_complete_input(line);
+		if (!line)
+		{
+			shell->exit_status = 130;
+			rl_on_new_line();
+			rl_replace_line("", 0);
+			continue ;
 		}
 		if (*line)
 		{
@@ -97,5 +107,5 @@ int	main(int argc, char **argv, char **envp)
 	new_shell(&shell, envp);
 	init_signals_prompt();
 	shell_loop(&shell);
-	return(0);
+	return (0);
 }

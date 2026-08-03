@@ -44,7 +44,9 @@ SRCS = \
 	builtins/builtins.c \
 	builtins/env.c \
 	builtins/env_utils.c \
-	utils/free_cmd.c
+	utils/free_cmd.c \
+	utils/read_continuation_line.c
+
 
 OBJS = $(SRCS:.c=.o)
 

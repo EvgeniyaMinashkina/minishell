@@ -12,26 +12,20 @@
 
 #include "minishell.h"
 
-/*
-** Ctrl+C in prompt
-*/
 static void	sigint_prompt(int sig)
 {
 	(void)sig;
-	write(1, "\n", 1);
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
 	g_signal = SIGINT;
+	write(STDOUT_FILENO, "\n", 1);
 }
 
 void	init_signals_prompt(void)
 {
 	struct sigaction	sa;
 
-	sa.sa_handler = sigint_prompt;
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
+	sa.sa_handler = sigint_prompt;
+	sa.sa_flags = 0;
 	sigaction(SIGINT, &sa, NULL);
 	signal(SIGQUIT, SIG_IGN);
 }
