@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/03 00:02:10 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/03 18:06:13 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,9 +236,5 @@ void	init_signals_child(void);
 void	free_cmds(t_cmd *cmds);
 void	free_redirs(t_redir *redirs);
 void	shell_exit(t_shell *shell, int status);
-
-/* utils/read_continuation.c */
-char	*read_continuation_line(void);
-char	*read_complete_input(char *line);
 
 #endif

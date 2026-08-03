@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 13:12:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/03 17:29:19 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/03 18:02:09 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,6 @@ static void	shell_loop(t_shell *shell)
 	while (1)
 	{
 		line = readline("minishell$ ");
-		if (line)
-			line = read_complete_input(line);
 		if (g_signal == SIGINT)
 		{
 			shell->exit_status = 130;
