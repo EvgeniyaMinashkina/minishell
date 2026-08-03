@@ -12,10 +12,10 @@
 
 #include "minishell.h"
 
-char	*build_word(t_shell *shell, char *str, int *i, t_quote_state *quote_state)
+char	*build_word(t_shell *shell, char *str,
+	int *i, t_quote_state *quote_state)
 {
 	t_quote_state	state;
-	char			*result;
 	char			buffer[10000];
 	int				j;
 	bool			quoted;
@@ -27,13 +27,7 @@ char	*build_word(t_shell *shell, char *str, int *i, t_quote_state *quote_state)
 	{
 		if (state == NONE && (is_space(str[*i]) || is_operator(&str[*i])))
 			break ;
-		if ((str[*i] == '\'' && state != DOUBLE_QUOTE)
-			|| (str[*i] == '"' && state != SINGLE_QUOTE))
-		{
-			if (state == NONE)
-				quoted = true;
-			toggle_quote_state(&state, str[*i]);
-		}
+		handle_quote(str[*i], &state, &quoted);
 		buffer[j++] = str[*i];
 		(*i)++;
 	}
@@ -41,13 +35,11 @@ char	*build_word(t_shell *shell, char *str, int *i, t_quote_state *quote_state)
 		return (throw_error(shell, ERR_UNCLOSED_QUOTE), NULL);
 	if (state != NONE)
 		return (NULL);
+	*quote_state = NONE;
 	if (quoted)
 		*quote_state = DOUBLE_QUOTE;
-	else
-		*quote_state = NONE;
 	buffer[j] = '\0';
-	result = ft_strdup(buffer);
-	return (result);
+	return (ft_strdup(buffer));
 }
 
 t_token	*add_new_token(t_token **head, t_token_type type, char *value,

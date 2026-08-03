@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/02 22:56:12 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/03 00:02:10 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,10 @@ typedef enum e_error_type
 	ERR_EXPECTED_FILENAME
 }	t_error_type;
 
-/*LEXER dir. */
+/* ************************************************************************** */
+/*                                 LEXER                                      */
+/* ************************************************************************** */
+
 /* lexer.c */
 t_token	*lexer(t_shell *shell, char *str);
 /*lexer/helper.c */
@@ -110,14 +113,22 @@ bool	is_space(char c);
 int		is_operator(char *str);
 void	free_tokens(t_token *tokens);
 void	toggle_quote_state(t_quote_state *state, char c);
+bool	handle_quote(char c, t_quote_state *state, bool *quoted);
 
+/* ************************************************************************** */
+/*                                 SYNTAX                                     */
+/* ************************************************************************** */
 /* syntax/syntax_check.c */
 int		syntax_check(t_shell *shell);
 int		is_binary_operator(t_token *token);
 int		is_redirection(t_token *token);
+
 /* syntax/parenthesis_check.c */
 int		check_parenthesis(t_shell *shell);
 
+/* ************************************************************************** */
+/*                                 PARSER                                     */
+/* ************************************************************************** */
 /* parser/parser.c */
 t_cmd	*parse_tokens(t_shell *shell);
 void	print_cmds(t_cmd *cmd_list);
@@ -128,12 +139,17 @@ void	add_redir(t_cmd *cmd, t_token_type type, char *filename, bool expand);
 void	add_argv(t_cmd *cmd, char *value);
 void	add_cmd_back(t_cmd **cmd_list, t_cmd *new_cmd);
 
+/* ************************************************************************** */
+/*                                 ERROR                                      */
+/* ************************************************************************** */
 /* error.c */
 int		throw_error(t_shell *shell, t_error_type type);
 char	*token_type_to_str(t_token *token);
 int		syntax_error_token(t_shell *shell, char *token_value);
 
-/* EXPANDER */
+/* ************************************************************************** */
+/*                                 EXPANDER                                   */
+/* ************************************************************************** */
 /* expander/expander.c */
 void	expand_cmds(t_shell *shell);
 
@@ -159,7 +175,6 @@ void	toggle_or_add_quote(t_quote_state *quote, char c, char **res);
 /* ************************************************************************** */
 /*                                 EXECUTOR                                   */
 /* ************************************************************************** */
-
 void	print_exec_error(char *cmd);
 char	*resolve_path(t_cmd *cmd, t_shell *shell);
 int		execute_single_command(t_cmd *cmd, t_shell *shell);
@@ -168,6 +183,7 @@ int		execute_pipeline(t_cmd *cmd_list, t_shell *shell);
 int		execute_command(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell);
 int		setup_pipe(t_cmd *cmd, int pipefd[2]);
 int		handle_exec_error(int prev_fd, t_cmd *cmd, int pipefd[2]);
+void	exit_exec_error(t_cmd *cmd, t_shell *shell);
 void	update_fds(int *prev_fd, t_cmd *cmd, int pipefd[2]);
 int		save_stdio(int *stdin_copy, int *stdout_copy);
 void	restore_stdio(int stdin_copy, int stdout_copy);
@@ -175,7 +191,6 @@ void	restore_stdio(int stdin_copy, int stdout_copy);
 /* ************************************************************************** */
 /*                                 BUILTINS                                   */
 /* ************************************************************************** */
-
 int		is_valid_identifier(char *str);
 int		is_builtin(char *cmd);
 int		is_parent_builtin(char *cmd);
@@ -188,30 +203,8 @@ int		builtin_cd(char **argv, t_shell *shell);
 int		exec_builtin(t_cmd *cmd, t_shell *shell);
 
 /* ************************************************************************** */
-/*                                  SYSTEM                                    */
-/* ************************************************************************** */
-
-int		apply_redirections(t_redir *redirs, t_shell *shell);
-int		heredoc_pipe(char *delim, bool expand, t_shell *shell);
-
-
-/* ************************************************************************** */
-/*                                   PATH                                     */
-/* ************************************************************************** */
-
-char	*find_cmd_path(char *cmd, char **envp);
-
-/* ************************************************************************** */
-/*                                  SIGNALS                                   */
-/* ************************************************************************** */
-
-void	init_signals_prompt(void);
-void	init_signals_child(void);
-
-/* ************************************************************************** */
 /*                                    ENV                                     */
 /* ************************************************************************** */
-
 int		env_count(char **envp);
 char	*env_get(char **envp, const char *key);
 int		env_set(char ***envp, const char *key, const char *value);
@@ -221,12 +214,30 @@ char	*create_env_line(const char *key, const char *value);
 void	free_env(char **envp);
 
 /* ************************************************************************** */
-/*                                   FREE                                     */
+/*                                  SYSTEM                                    */
 /* ************************************************************************** */
+/* system/heredoc.c */
+int		heredoc_pipe(char *delim, bool expand, t_shell *shell);
+
+/* system/path.c */
+char	*find_cmd_path(char *cmd, char **envp);
+
+/* system/redirections.c */
+int		apply_redirections(t_redir *redirs, t_shell *shell);
+
+/* system/signals.c */
+void	init_signals_prompt(void);
+void	init_signals_child(void);
+
+/* ************************************************************************** */
+/*                                   UTILS                                    */
+/* ************************************************************************** */
+/* utils/free_cmd.c */
 void	free_cmds(t_cmd *cmds);
 void	free_redirs(t_redir *redirs);
 void	shell_exit(t_shell *shell, int status);
 
+/* utils/read_continuation.c */
 char	*read_continuation_line(void);
 char	*read_complete_input(char *line);
 

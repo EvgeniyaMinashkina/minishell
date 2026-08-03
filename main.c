@@ -80,13 +80,11 @@ static void	shell_loop(t_shell *shell)
 			printf("exit\n");
 			shell_exit(shell, shell->exit_status);
 		}
-		if (*line == '\0')
+		if (*line)
 		{
-			free(line);
-			continue ;
+			add_history(line);
+			process_input(shell, line);
 		}
-		add_history(line);
-		process_input(shell, line);
 		free(line);
 	}
 }

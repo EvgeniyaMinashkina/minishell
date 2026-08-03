@@ -6,7 +6,7 @@
 /*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:04:04 by tkoval            #+#    #+#             */
-/*   Updated: 2026/06/23 18:38:24 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/08/03 09:56:21 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,4 +63,17 @@ void	toggle_quote_state(t_quote_state *state, char c)
 		else
 			*state = NONE;
 	}
+}
+
+bool	handle_quote(char c, t_quote_state *state, bool *quoted)
+{
+	if ((c == '\'' && *state != DOUBLE_QUOTE)
+		|| (c == '"' && *state != SINGLE_QUOTE))
+	{
+		if (*state == NONE)
+			*quoted = true;
+		toggle_quote_state(state, c);
+		return (true);
+	}
+	return (false);
 }

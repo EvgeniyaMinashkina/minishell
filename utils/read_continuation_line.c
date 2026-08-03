@@ -12,42 +12,41 @@
 
 #include "minishell.h"
 
-char	*read_continuation_line(void)
+static char	*read_chars(char *line)
 {
 	char	buf[2];
-	char	*line;
 	char	*tmp;
 	int		n;
+
+	while (1)
+	{
+		n = read(STDIN_FILENO, buf, 1);
+		if (g_signal == SIGINT)
+			return (free(line), NULL);
+		if (n <= 0 || buf[0] == '\n')
+			break ;
+		buf[1] = '\0';
+		tmp = ft_strjoin(line, buf);
+		free(line);
+		line = tmp;
+		if (!line)
+			return (NULL);
+	}
+	if (n == 0 && !line[0])
+		return (free(line), NULL);
+	return (line);
+}
+
+char	*read_continuation_line(void)
+{
+	char	*line;
 
 	line = ft_strdup("");
 	if (!line)
 		return (NULL);
 	write(STDOUT_FILENO, "> ", 2);
-	while (1)
-	{
-		n = read(STDIN_FILENO, buf, 1);
-		if (g_signal == SIGINT)
-		{
-			free(line);
-			return (NULL);
-		}
-		if (n <= 0)
-			break ;
-		buf[1] = '\0';
-		if (buf[0] == '\n')
-			break ;
-		tmp = ft_strjoin(line, buf);
-		free(line);
-		line = tmp;
-	}
-	if (n == 0 && line[0] == '\0')
-	{
-		free(line);
-		return (NULL);
-	}
-	return (line);
+	return (read_chars(line));
 }
-
 
 static int	has_unclosed_quote(char *str)
 {
@@ -71,21 +70,10 @@ static int	has_unclosed_quote(char *str)
 	return (state != NONE);
 }
 
-static char	*join_lines(char *line, char *next)
-{
-	char	*tmp;
-
-	tmp = ft_strjoin(line, "\n");
-	free(line);
-	line = ft_strjoin(tmp, next);
-	free(tmp);
-	free(next);
-	return (line);
-}
-
 char	*read_complete_input(char *line)
 {
 	char	*next;
+	char	*tmp;
 
 	while (has_unclosed_quote(line))
 	{
@@ -95,7 +83,11 @@ char	*read_complete_input(char *line)
 			free(line);
 			return (ft_strdup(""));
 		}
-		line = join_lines(line, next);
+		tmp = ft_strjoin(line, "\n");
+		free(line);
+		line = ft_strjoin(tmp, next);
+		free(tmp);
+		free(next);
 	}
 	return (line);
 }

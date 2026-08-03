@@ -18,6 +18,22 @@ void	print_exec_error(char *cmd)
 	ft_putstr_fd(": ", 2);
 }
 
+void	exit_exec_error(t_cmd *cmd, t_shell *shell)
+{
+	print_exec_error(cmd->argv[0]);
+	if (errno == EACCES)
+		ft_putendl_fd("Permission denied", 2);
+	else if (errno == EISDIR)
+		ft_putendl_fd("Is a directory", 2);
+	else if (ft_strchr(cmd->argv[0], '/'))
+		ft_putendl_fd("No such file or directory", 2);
+	else
+		ft_putendl_fd("command not found", 2);
+	if (errno == EACCES || errno == EISDIR)
+		shell_exit(shell, 126);
+	shell_exit(shell, 127);
+}
+
 static char	*resolve_from_env(char *cmd, t_shell *shell)
 {
 	return (find_cmd_path(cmd, shell->envp));

@@ -39,8 +39,8 @@ static void	input_output_setup(t_shell *shell, int *in_fd, int *out_fd)
 }
 
 // CRITICAL FIX #1:
-// закрываем ВСЕ лишние pipe fd, которые могли унаследоваться
-// иначе yes | head висит*/
+// close ALL unnecessary pipe file descriptors that could have been inherited
+// otherwise yes | head hangs
 void	close_odd_pipes(void)
 {
 	int	fd;
@@ -83,19 +83,7 @@ static void	execute_child(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 		shell_exit(shell, exec_builtin(cmd, shell));
 	path = resolve_path(cmd, shell);
 	if (!path)
-	{
-		print_exec_error(cmd->argv[0]);
-		if (errno == EACCES)
-			ft_putendl_fd("Permission denied", 2);
-		else if (errno == EISDIR)
-			ft_putendl_fd("Is a directory", 2);
-		else if (ft_strchr(cmd->argv[0], '/'))
-			ft_putendl_fd("No such file or directory", 2);
-		else
-			ft_putendl_fd("command not found", 2);
-		shell_exit(shell,
-			errno == EACCES || errno == EISDIR ? 126 : 127);
-	}
+		exit_exec_error(cmd, shell);
 	exec_process(cmd, path, shell);
 }
 

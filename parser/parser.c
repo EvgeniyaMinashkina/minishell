@@ -35,7 +35,8 @@ static int	handle_token(t_shell *shell, t_cmd *cmd,
 		*head = (*head)->next;
 		if (!*head || (*head)->type != WORD)
 			return (handle_error(shell, ERR_GENERAL, &cmd_list), 0);
-		add_redir(cmd, redir_type, (*head)->value, (*head)->quote_state == NONE);
+		add_redir(cmd, redir_type, (*head)->value,
+			(*head)->quote_state == NONE);
 	}
 	return (1);
 }

@@ -12,10 +12,26 @@
 
 #include "minishell.h"
 
-static void heredoc_child(char *delim, int write_fd, bool expand, t_shell *shell)
+static void	write_heredoc_line(char *line, int write_fd,
+	bool expand, t_shell *shell)
+{
+	char	*expanded;
+
+	if (expand)
+	{
+		expanded = expand_string(line, shell);
+		write(write_fd, expanded, ft_strlen(expanded));
+		free(expanded);
+	}
+	else
+		write(write_fd, line, ft_strlen(line));
+	write(write_fd, "\n", 1);
+}
+
+static void	heredoc_child(char *delim, int write_fd,
+	bool expand, t_shell *shell)
 {
 	char	*line;
-	char	*expanded;
 
 	signal(SIGINT, SIG_DFL);
 	while (1)
@@ -23,21 +39,12 @@ static void heredoc_child(char *delim, int write_fd, bool expand, t_shell *shell
 		line = readline("> ");
 		if (!line)
 			break ;
-		if (ft_strncmp(line, delim,
-				ft_strlen(delim) + 1) == 0)
+		if (ft_strncmp(line, delim, ft_strlen(delim) + 1) == 0)
 		{
 			free(line);
 			break ;
 		}
-		if (expand)
-		{
-			expanded = expand_string(line, shell);
-			write(write_fd, expanded, ft_strlen(expanded));
-			free(expanded);
-		}
-		else
-			write(write_fd, line, ft_strlen(line));
-		write(write_fd, "\n", 1);
+		write_heredoc_line(line, write_fd, expand, shell);
 		free(line);
 	}
 	close(write_fd);
