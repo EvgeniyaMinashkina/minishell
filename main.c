@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
+/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 13:12:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/07/31 23:45:21 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/03 17:29:19 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,4 +99,5 @@ int	main(int argc, char **argv, char **envp)
 	new_shell(&shell, envp);
 	init_signals_prompt();
 	shell_loop(&shell);
+	return(0);
 }

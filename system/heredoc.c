@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:14:22 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/03 13:34:01 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/03 17:26:04 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,25 @@ static void	heredoc_sigint(int sig)
 	close(STDIN_FILENO);
 }
 
+static void	free_heredoc_child(t_shell *shell)
+{
+	if (!shell)
+		return ;
+	free_tokens(shell->tokens);
+	shell->tokens = NULL;
+	free_cmds(shell->cmd_list);
+	shell->cmd_list = NULL;
+	free_env(shell->envp);
+	shell->envp = NULL;
+	rl_clear_history();
+}
+
+static void	heredoc_exit(int status, t_shell *shell)
+{
+	free_heredoc_child(shell);
+	_exit(status);
+}
+
 static int	wait_heredoc(pid_t pid, int read_fd, t_shell *shell)
 {
 	int	status;
@@ -28,9 +47,11 @@ static int	wait_heredoc(pid_t pid, int read_fd, t_shell *shell)
 		if (errno != EINTR)
 		{
 			close(read_fd);
+			init_signals_prompt();
 			return (-1);
 		}
 	}
+	init_signals_prompt();
 	if (WIFEXITED(status) && WEXITSTATUS(status) == 130)
 	{
 		close(read_fd);
@@ -47,15 +68,18 @@ static int	wait_heredoc(pid_t pid, int read_fd, t_shell *shell)
 }
 
 static void	write_heredoc_line(char *line, int write_fd,
-	bool expand, t_shell *shell)
+		bool expand, t_shell *shell)
 {
 	char	*expanded;
 
 	if (expand)
 	{
 		expanded = expand_string(line, shell);
-		write(write_fd, expanded, ft_strlen(expanded));
-		free(expanded);
+		if (expanded)
+		{
+			write(write_fd, expanded, ft_strlen(expanded));
+			free(expanded);
+		}
 	}
 	else
 		write(write_fd, line, ft_strlen(line));
@@ -63,19 +87,20 @@ static void	write_heredoc_line(char *line, int write_fd,
 }
 
 static void	heredoc_child(char *delim, int write_fd,
-	bool expand, t_shell *shell)
+		bool expand, t_shell *shell)
 {
 	char	*line;
 
 	g_signal = 0;
 	signal(SIGINT, heredoc_sigint);
+
 	while (1)
 	{
 		line = readline("> ");
 		if (g_signal == SIGINT)
 		{
 			close(write_fd);
-			shell_exit(shell, 130);
+			heredoc_exit(130, shell);
 		}
 		if (!line)
 			break ;
@@ -88,7 +113,7 @@ static void	heredoc_child(char *delim, int write_fd,
 		free(line);
 	}
 	close(write_fd);
-	shell_exit(shell, 0);
+	heredoc_exit(0, shell);
 }
 
 int	heredoc_pipe(char *delim, bool expand, t_shell *shell)
@@ -98,18 +123,24 @@ int	heredoc_pipe(char *delim, bool expand, t_shell *shell)
 
 	if (pipe(fd) == -1)
 		return (-1);
+
+	signal(SIGINT, SIG_IGN);
+
 	pid = fork();
 	if (pid < 0)
 	{
 		close(fd[0]);
 		close(fd[1]);
+		init_signals_prompt();
 		return (-1);
 	}
+
 	if (pid == 0)
 	{
 		close(fd[0]);
 		heredoc_child(delim, fd[1], expand, shell);
 	}
+
 	close(fd[1]);
 	return (wait_heredoc(pid, fd[0], shell));
 }
