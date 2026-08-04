@@ -228,7 +228,6 @@ int		apply_redirections(t_redir *redirs, t_shell *shell);
 /* system/signals.c */
 void	init_signals_prompt(void);
 void	init_signals_child(void);
-void	reset_terminal_after_interrupt(void);
 
 /* ************************************************************************** */
 /*                                   UTILS                                    */
@@ -237,9 +236,5 @@ void	reset_terminal_after_interrupt(void);
 void	free_cmds(t_cmd *cmds);
 void	free_redirs(t_redir *redirs);
 void	shell_exit(t_shell *shell, int status);
-
-/* utils/read_continuation.c */
-char	*read_continuation_line(void);
-char	*read_complete_input(char *line);
 
 #endif
