@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_cmd.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
+/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:15:42 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/23 00:29:14 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/08/04 15:08:38 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,19 @@ static int	exec_parent_builtin(t_cmd *cmd, t_shell *shell)
 	return (status);
 }
 
+static void	close_heredocs(t_redir *redirs)
+{
+	while (redirs)
+	{
+		if (redirs->type == HEREDOC && redirs->fd >= 0)
+		{
+			close(redirs->fd);
+			redirs->fd = -1;
+		}
+		redirs = redirs->next;
+	}
+}
+
 /*
 ** Execute single command (no pipes)
 ** Builtins like cd/export/unset/exit run in parent
@@ -46,6 +59,7 @@ int	execute_single_command(t_cmd *cmd, t_shell *shell)
 		&& is_parent_builtin(cmd->argv[0]))
 	{
 		shell->exit_status = exec_parent_builtin(cmd, shell);
+		close_heredocs(cmd->redirs);
 		return (shell->exit_status);
 	}
 	pid = execute_command(cmd, STDIN_FILENO,
@@ -53,9 +67,11 @@ int	execute_single_command(t_cmd *cmd, t_shell *shell)
 	if (pid < 0)
 	{
 		shell->exit_status = 1;
+		close_heredocs(cmd->redirs);
 		return (1);
 	}
 	waitpid(pid, &status, 0);
+	close_heredocs(cmd->redirs);
 	if (WIFEXITED(status))
 		shell->exit_status = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))

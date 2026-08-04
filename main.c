@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 13:12:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/03 18:02:09 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/04 14:52:40 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,14 @@ static void	process_input(t_shell *shell, char *line)
 	if (!shell->cmd_list)
 		return ;
 	expand_cmds(shell);
+	if (prepare_heredocs(shell->cmd_list, shell))
+	{
+		free_tokens(shell->tokens);
+		free_cmds(shell->cmd_list);
+		shell->tokens = NULL;
+		shell->cmd_list = NULL;
+		return ;
+	}
 	if (!shell->cmd_list->next)
 		execute_single_command(shell->cmd_list, shell);
 	else

@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:47:19 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/12 14:18:24 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/04 14:53:49 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@ void	free_redirs(t_redir *redirs)
 	while (redirs)
 	{
 		tmp = redirs->next;
+		if (redirs->type == HEREDOC && redirs->fd >= 0)
+			close(redirs->fd);
 		free(redirs->filename);
 		free(redirs);
 		redirs = tmp;

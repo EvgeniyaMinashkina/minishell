@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/03 18:06:13 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/04 15:48:08 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ typedef struct s_redir
 	t_token_type	type;
 	char			*filename;
 	bool			expand;
+	int				fd;
 	struct s_redir	*next;
 }	t_redir;
 
@@ -217,8 +218,7 @@ void	free_env(char **envp);
 /*                                  SYSTEM                                    */
 /* ************************************************************************** */
 /* system/heredoc.c */
-int		heredoc_pipe(char *delim, bool expand, t_shell *shell);
-
+int		prepare_heredocs(t_cmd *cmds, t_shell *shell);
 /* system/path.c */
 char	*find_cmd_path(char *cmd, char **envp);
 

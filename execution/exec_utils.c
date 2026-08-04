@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
+/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/23 00:13:19 by tkoval            #+#    #+#             */
-/*   Updated: 2026/06/23 00:21:50 by tkoval           ###   ########.fr       */
+/*   Updated: 2026/08/04 16:05:07 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,10 +38,15 @@ void	update_fds(int *prev_fd, t_cmd *cmd, int pipefd[2])
 {
 	if (*prev_fd != STDIN_FILENO)
 		close(*prev_fd);
+
 	if (cmd->next)
 	{
 		close(pipefd[1]);
 		*prev_fd = pipefd[0];
+	}
+	else
+	{
+		*prev_fd = STDIN_FILENO;
 	}
 }
 

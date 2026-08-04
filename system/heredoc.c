@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:14:22 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/03 17:26:04 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/04 15:54:01 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,23 +19,55 @@ static void	heredoc_sigint(int sig)
 	close(STDIN_FILENO);
 }
 
-static void	free_heredoc_child(t_shell *shell)
+static void	write_heredoc_line(char *line, int fd,
+		bool expand, t_shell *shell)
 {
-	if (!shell)
-		return ;
-	free_tokens(shell->tokens);
-	shell->tokens = NULL;
-	free_cmds(shell->cmd_list);
-	shell->cmd_list = NULL;
-	free_env(shell->envp);
-	shell->envp = NULL;
-	rl_clear_history();
+	char	*expanded;
+
+	if (expand)
+	{
+		expanded = expand_string(line, shell);
+		if (expanded)
+		{
+			write(fd, expanded, ft_strlen(expanded));
+			free(expanded);
+		}
+	}
+	else
+		write(fd, line, ft_strlen(line));
+
+	write(fd, "\n", 1);
 }
 
-static void	heredoc_exit(int status, t_shell *shell)
+static int	heredoc_write(char *delim, bool expand,
+		int write_fd, t_shell *shell)
 {
-	free_heredoc_child(shell);
-	_exit(status);
+	char	*line;
+
+	while (1)
+	{
+		line = readline("> ");
+
+		if (g_signal == SIGINT)
+		{
+			free(line);
+			close(write_fd);
+			return (130);
+		}
+
+		if (!line)
+			break ;
+
+		if (!ft_strncmp(line, delim, ft_strlen(delim) + 1))
+		{
+			free(line);
+			break ;
+		}
+
+		write_heredoc_line(line, write_fd, expand, shell);
+		free(line);
+	}
+	return (0);
 }
 
 static int	wait_heredoc(pid_t pid, int read_fd, t_shell *shell)
@@ -51,78 +83,36 @@ static int	wait_heredoc(pid_t pid, int read_fd, t_shell *shell)
 			return (-1);
 		}
 	}
+
 	init_signals_prompt();
-	if (WIFEXITED(status) && WEXITSTATUS(status) == 130)
+
+	if (WIFEXITED(status))
 	{
-		close(read_fd);
-		shell->exit_status = 130;
-		return (-1);
+		if (WEXITSTATUS(status) == 130)
+		{
+			close(read_fd);
+			shell->exit_status = 130;
+			return (-1);
+		}
 	}
-	if (WIFSIGNALED(status))
+	else if (WIFSIGNALED(status))
 	{
 		close(read_fd);
 		shell->exit_status = 128 + WTERMSIG(status);
 		return (-1);
 	}
+
 	return (read_fd);
 }
 
-static void	write_heredoc_line(char *line, int write_fd,
-		bool expand, t_shell *shell)
-{
-	char	*expanded;
-
-	if (expand)
-	{
-		expanded = expand_string(line, shell);
-		if (expanded)
-		{
-			write(write_fd, expanded, ft_strlen(expanded));
-			free(expanded);
-		}
-	}
-	else
-		write(write_fd, line, ft_strlen(line));
-	write(write_fd, "\n", 1);
-}
-
-static void	heredoc_child(char *delim, int write_fd,
-		bool expand, t_shell *shell)
-{
-	char	*line;
-
-	g_signal = 0;
-	signal(SIGINT, heredoc_sigint);
-
-	while (1)
-	{
-		line = readline("> ");
-		if (g_signal == SIGINT)
-		{
-			close(write_fd);
-			heredoc_exit(130, shell);
-		}
-		if (!line)
-			break ;
-		if (ft_strncmp(line, delim, ft_strlen(delim) + 1) == 0)
-		{
-			free(line);
-			break ;
-		}
-		write_heredoc_line(line, write_fd, expand, shell);
-		free(line);
-	}
-	close(write_fd);
-	heredoc_exit(0, shell);
-}
-
-int	heredoc_pipe(char *delim, bool expand, t_shell *shell)
+static int	create_heredoc_pipe(t_cmd *cmd, t_shell *shell)
 {
 	int		fd[2];
 	pid_t	pid;
+	t_redir	*r;
 
 	if (pipe(fd) == -1)
-		return (-1);
+		return (1);
 
 	signal(SIGINT, SIG_IGN);
 
@@ -132,15 +122,68 @@ int	heredoc_pipe(char *delim, bool expand, t_shell *shell)
 		close(fd[0]);
 		close(fd[1]);
 		init_signals_prompt();
-		return (-1);
+		return (1);
 	}
 
 	if (pid == 0)
 	{
 		close(fd[0]);
-		heredoc_child(delim, fd[1], expand, shell);
+
+		g_signal = 0;
+		signal(SIGINT, heredoc_sigint);
+
+		r = cmd->redirs;
+		while (r)
+		{
+			if (r->type == HEREDOC)
+			{
+				if (heredoc_write(r->filename,
+						r->expand, fd[1], shell))
+				{
+					close(fd[1]);
+					_exit(130);
+				}
+			}
+			r = r->next;
+		}
+
+		close(fd[1]);
+		_exit(0);
 	}
 
 	close(fd[1]);
+
+	r = cmd->redirs;
+	while (r)
+	{
+		if (r->type == HEREDOC)
+			r->fd = fd[0];
+		r = r->next;
+	}
+
 	return (wait_heredoc(pid, fd[0], shell));
+}
+
+int	prepare_heredocs(t_cmd *cmds, t_shell *shell)
+{
+	t_cmd	*cmd;
+	t_redir	*r;
+
+	cmd = cmds;
+	while (cmd)
+	{
+		r = cmd->redirs;
+		while (r)
+		{
+			if (r->type == HEREDOC)
+			{
+				if (create_heredoc_pipe(cmd, shell) < 0)
+					return (1);
+				break ;
+			}
+			r = r->next;
+		}
+		cmd = cmd->next;
+	}
+	return (0);
 }

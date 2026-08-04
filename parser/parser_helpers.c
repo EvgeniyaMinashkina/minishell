@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_helpers.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkoval <tkoval@student.42prague.com>       +#+  +:+       +#+        */
+/*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/20 15:11:29 by tkoval            #+#    #+#             */
-/*   Updated: 2026/08/02 23:26:51 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/04 15:20:23 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,14 @@ static t_redir	*new_redir(t_token_type type, char *filename, bool expand)
 	if (!new)
 		return (NULL);
 	new->filename = ft_strdup(filename);
+	if (!new->filename)
+	{
+		free(new);
+		return (NULL);
+	}
 	new->type = type;
 	new->expand = expand;
+	new->fd = -1;
 	new->next = NULL;
 	return (new);
 }
