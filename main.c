@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 13:12:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/06 03:00:38 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/06 03:45:29 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,9 +100,6 @@ int	main(int argc, char **argv, char **envp)
 	(void)argv;
 	ft_memset(&shell, 0, sizeof(t_shell));
 	shell.envp = env_init(envp);
-	shell.error_msg = NULL;
-	shell.exit_status = 0;
-	shell.cmd_list = NULL;
 	init_signals_prompt();
 	shell_loop(&shell);
 	return (0);
