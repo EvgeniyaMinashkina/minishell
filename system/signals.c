@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:16:31 by yminashk          #+#    #+#             */
-/*   Updated: 2026/06/12 14:18:19 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/06 03:02:59 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,4 +40,11 @@ void	init_signals_child(void)
 {
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
+}
+
+void	heredoc_sigint(int sig)
+{
+	(void)sig;
+	g_signal = SIGINT;
+	close(STDIN_FILENO);
 }

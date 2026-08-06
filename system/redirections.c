@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 14:50:34 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/04 15:44:05 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/06 02:52:16 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ static int	get_redir_fd(t_redir *r, t_shell *shell,
 	{
 		*fd = r->fd;
 		*target = STDIN_FILENO;
-
 		if (*fd < 0)
 		{
 			shell->exit_status = 1;
@@ -60,20 +59,17 @@ static int	get_redir_fd(t_redir *r, t_shell *shell,
 	else
 	{
 		*fd = open_file(r);
-
 		if (*fd < 0)
 		{
 			perror(r->filename);
 			shell->exit_status = 1;
 			return (1);
 		}
-
 		if (r->type == REDIR_IN)
 			*target = STDIN_FILENO;
 		else
 			*target = STDOUT_FILENO;
 	}
-
 	return (0);
 }
 
@@ -91,17 +87,10 @@ int	apply_redirections(t_redir *redirs, t_shell *shell)
 	{
 		if (get_redir_fd(r, shell, &fd, &target))
 			return (1);
-
 		if (redirect_fd(fd, target, shell))
 			return (1);
-
-		/*
-		 * heredoc fd нельзя закрывать здесь.
-		 * Он нужен следующему heredoc или процессу.
-		 */
 		if (r->type != HEREDOC)
 			close(fd);
-
 		r = r->next;
 	}
 	return (0);

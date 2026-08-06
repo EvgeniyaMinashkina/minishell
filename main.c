@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/15 13:12:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/04 14:52:40 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/06 03:00:38 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,24 @@ static void	print_error(t_shell *shell)
 	shell->cmd_list = NULL;
 }
 
+static int	execute_cmds(t_shell *shell)
+{
+	if (!shell->cmd_list)
+		return (0);
+	expand_cmds(shell);
+	if (prepare_heredocs(shell->cmd_list, shell))
+		return (1);
+	if (!shell->cmd_list->next)
+		execute_single_command(shell->cmd_list, shell);
+	else
+		execute_pipeline(shell->cmd_list, shell);
+	return (0);
+}
+
 static void	process_input(t_shell *shell, char *line)
 {
 	if (!line || !*line)
 		return ;
-	shell->tokens = NULL;
-	shell->cmd_list = NULL;
 	shell->tokens = lexer(shell, line);
 	if (shell->error_msg)
 		return (print_error(shell));
@@ -40,10 +52,7 @@ static void	process_input(t_shell *shell, char *line)
 	shell->cmd_list = parse_tokens(shell);
 	if (shell->error_msg)
 		return (print_error(shell));
-	if (!shell->cmd_list)
-		return ;
-	expand_cmds(shell);
-	if (prepare_heredocs(shell->cmd_list, shell))
+	if (execute_cmds(shell))
 	{
 		free_tokens(shell->tokens);
 		free_cmds(shell->cmd_list);
@@ -51,21 +60,9 @@ static void	process_input(t_shell *shell, char *line)
 		shell->cmd_list = NULL;
 		return ;
 	}
-	if (!shell->cmd_list->next)
-		execute_single_command(shell->cmd_list, shell);
-	else
-		execute_pipeline(shell->cmd_list, shell);
 	free_tokens(shell->tokens);
 	free_cmds(shell->cmd_list);
 	shell->tokens = NULL;
-	shell->cmd_list = NULL;
-}
-
-static void	new_shell(t_shell *shell, char **envp)
-{
-	shell->envp = env_init(envp);
-	shell->error_msg = NULL;
-	shell->exit_status = 0;
 	shell->cmd_list = NULL;
 }
 
@@ -102,8 +99,11 @@ int	main(int argc, char **argv, char **envp)
 	(void)argc;
 	(void)argv;
 	ft_memset(&shell, 0, sizeof(t_shell));
-	new_shell(&shell, envp);
+	shell.envp = env_init(envp);
+	shell.error_msg = NULL;
+	shell.exit_status = 0;
+	shell.cmd_list = NULL;
 	init_signals_prompt();
 	shell_loop(&shell);
-	return(0);
+	return (0);
 }

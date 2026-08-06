@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:13:01 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/04 15:48:08 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/06 03:11:03 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,6 +219,10 @@ void	free_env(char **envp);
 /* ************************************************************************** */
 /* system/heredoc.c */
 int		prepare_heredocs(t_cmd *cmds, t_shell *shell);
+
+/* system/heredoc_utils.c */
+void	heredoc_child(t_cmd *cmd, int *fd, t_shell *shell);
+
 /* system/path.c */
 char	*find_cmd_path(char *cmd, char **envp);
 
@@ -228,6 +232,7 @@ int		apply_redirections(t_redir *redirs, t_shell *shell);
 /* system/signals.c */
 void	init_signals_prompt(void);
 void	init_signals_child(void);
+void	heredoc_sigint(int sig);
 
 /* ************************************************************************** */
 /*                                   UTILS                                    */

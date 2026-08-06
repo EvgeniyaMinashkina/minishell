@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:16:12 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/04 16:09:30 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/06 02:48:46 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,6 @@ static void	execute_child(t_cmd *cmd, int in_fd, int out_fd, t_shell *shell)
 	char	*path;
 
 	init_signals_child();
-
 	if (!cmd || !cmd->argv || !cmd->argv[0])
 		shell_exit(shell, 0);
 	input_output_setup(shell, &in_fd, &out_fd);

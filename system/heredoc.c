@@ -6,68 +6,27 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:14:22 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/06 02:36:26 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/06 03:13:33 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static void	heredoc_sigint(int sig)
+static int	check_heredoc_status(int status, int read_fd, t_shell *shell)
 {
-	(void)sig;
-	g_signal = SIGINT;
-	close(STDIN_FILENO);
-}
-
-static void	write_heredoc_line(char *line, int fd,
-		bool expand, t_shell *shell)
-{
-	char	*expanded;
-
-	if (expand)
+	if (WIFEXITED(status) && WEXITSTATUS(status) == 130)
 	{
-		expanded = expand_string(line, shell);
-		if (expanded)
-		{
-			write(fd, expanded, ft_strlen(expanded));
-			free(expanded);
-		}
+		close(read_fd);
+		shell->exit_status = 130;
+		return (-1);
 	}
-	else
-		write(fd, line, ft_strlen(line));
-
-	write(fd, "\n", 1);
-}
-
-static int	heredoc_write(char *delim, bool expand,
-		int write_fd, t_shell *shell)
-{
-	char	*line;
-
-	while (1)
+	if (WIFSIGNALED(status))
 	{
-		line = readline("> ");
-
-		if (g_signal == SIGINT)
-		{
-			free(line);
-			close(write_fd);
-			return (130);
-		}
-
-		if (!line)
-			break ;
-
-		if (!ft_strncmp(line, delim, ft_strlen(delim) + 1))
-		{
-			free(line);
-			break ;
-		}
-
-		write_heredoc_line(line, write_fd, expand, shell);
-		free(line);
+		close(read_fd);
+		shell->exit_status = 128 + WTERMSIG(status);
+		return (-1);
 	}
-	return (0);
+	return (read_fd);
 }
 
 static int	wait_heredoc(pid_t pid, int read_fd, t_shell *shell)
@@ -83,39 +42,28 @@ static int	wait_heredoc(pid_t pid, int read_fd, t_shell *shell)
 			return (-1);
 		}
 	}
-
 	init_signals_prompt();
+	return (check_heredoc_status(status, read_fd, shell));
+}
 
-	if (WIFEXITED(status))
+static void	assign_heredoc_fd(t_redir *redirs, int fd)
+{
+	while (redirs)
 	{
-		if (WEXITSTATUS(status) == 130)
-		{
-			close(read_fd);
-			shell->exit_status = 130;
-			return (-1);
-		}
+		if (redirs->type == HEREDOC)
+			redirs->fd = fd;
+		redirs = redirs->next;
 	}
-	else if (WIFSIGNALED(status))
-	{
-		close(read_fd);
-		shell->exit_status = 128 + WTERMSIG(status);
-		return (-1);
-	}
-
-	return (read_fd);
 }
 
 static int	create_heredoc_pipe(t_cmd *cmd, t_shell *shell)
 {
 	int		fd[2];
 	pid_t	pid;
-	t_redir	*r;
 
 	if (pipe(fd) == -1)
 		return (1);
-
 	signal(SIGINT, SIG_IGN);
-
 	pid = fork();
 	if (pid < 0)
 	{
@@ -124,43 +72,10 @@ static int	create_heredoc_pipe(t_cmd *cmd, t_shell *shell)
 		init_signals_prompt();
 		return (1);
 	}
-
 	if (pid == 0)
-	{
-		close(fd[0]);
-
-		g_signal = 0;
-		signal(SIGINT, heredoc_sigint);
-
-		r = cmd->redirs;
-		while (r)
-		{
-			if (r->type == HEREDOC)
-			{
-				if (heredoc_write(r->filename,
-						r->expand, fd[1], shell))
-				{
-					close(fd[1]);
-					shell_exit(shell, 130);
-				}
-			}
-			r = r->next;
-		}
-
-		close(fd[1]);
-		shell_exit(shell, 0);
-	}
-
+		heredoc_child(cmd, fd, shell);
 	close(fd[1]);
-
-	r = cmd->redirs;
-	while (r)
-	{
-		if (r->type == HEREDOC)
-			r->fd = fd[0];
-		r = r->next;
-	}
-
+	assign_heredoc_fd(cmd->redirs, fd[0]);
 	return (wait_heredoc(pid, fd[0], shell));
 }
 

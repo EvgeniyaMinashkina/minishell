@@ -36,6 +36,7 @@ SRCS = \
 	execution/exec_pipe.c \
 	system/redirections.c \
 	system/heredoc.c \
+	system/heredoc_utils.c \
 	system/signals.c \
 	system/path.c \
 	builtins/builtins_check.c \
