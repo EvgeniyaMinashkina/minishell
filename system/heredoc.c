@@ -6,7 +6,7 @@
 /*   By: yminashk <yminashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 13:14:22 by yminashk          #+#    #+#             */
-/*   Updated: 2026/08/04 15:54:01 by yminashk         ###   ########.fr       */
+/*   Updated: 2026/08/06 02:36:26 by yminashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,14 +141,14 @@ static int	create_heredoc_pipe(t_cmd *cmd, t_shell *shell)
 						r->expand, fd[1], shell))
 				{
 					close(fd[1]);
-					_exit(130);
+					shell_exit(shell, 130);
 				}
 			}
 			r = r->next;
 		}
 
 		close(fd[1]);
-		_exit(0);
+		shell_exit(shell, 0);
 	}
 
 	close(fd[1]);
