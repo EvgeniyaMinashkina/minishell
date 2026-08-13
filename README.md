@@ -1,6 +1,8 @@
 # 🐚 Minishell
 
-### This project has been created by Tetiana Koval (tkoval) and Yevheniia Minashkina (yminashk)
+### This project has been created by Tetiana Koval (tkoval) and Yevheniia Minashkina (yminashk) as part of the 42 school curriculum.
+
+
 
 Minishell is a simplified Unix shell written in C.
 The goal of this project is to reproduce the behavior of a real shell such as Bash by implementing command parsing, environment variable expansion, pipes, redirections, built-in commands and process management.
